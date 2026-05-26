@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VAST Video Player</title>
+    <title>VAST Video Player - Fixed</title>
     
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    
-    <!-- Video.js IMA Plugin CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/videojs-ima@1.11.0/dist/videojs.ima.css" />
     
     <style>
         * {
@@ -59,10 +56,6 @@
             transform: scale(1.1);
         }
 
-        .vjs-ads-label {
-            display: none !important;
-        }
-
         .ad-info {
             padding: 15px 20px;
             background: #1a1a1a;
@@ -79,57 +72,36 @@
             font-size: 0.85rem;
         }
 
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: #fff;
+        .status {
+            padding: 10px 20px;
+            background: #222;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: none;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: #0096ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+        .status.error {
+            color: #f44;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            color: #ff4444;
-            text-align: center;
-            padding: 20px;
+        .status.loading {
+            display: block;
+            color: #ff0;
         }
     </style>
 </head>
 <body>
 
     <div class="player-container">
-        <video id="content_video" class="video-js vjs-default-skin" controls preload="auto" playsinline>
-            <!-- Main content video (optional - will play after ads) -->
-            <source src="" type="video/mp4" />
-            <p class="vjs-no-js">
-                To view this video please enable JavaScript, and consider upgrading to a web browser that
-                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-            </p>
+        <div id="status" class="status">Loading...</div>
+        <video id="my_video" class="video-js vjs-default-skin" controls preload="auto" playsinline>
+            <p class="vjs-no-js">Please enable JavaScript to view this video.</p>
         </video>
         
         <div class="ad-info">
             <h3>VAST Ad Player</h3>
-            <p>HilltopAds VAST Tag • Auto-plays with sound muted</p>
+            <p>HilltopAds VAST Tag • Fixed Version</p>
         </div>
     </div>
 
@@ -143,64 +115,97 @@
     <script src="https://cdn.jsdelivr.net/npm/videojs-ima@1.11.0/dist/videojs.ima.min.js"></script>
 
     <script>
-        var player = videojs('content_video', {
+        var statusDiv = document.getElementById('status');
+        var vastTag = 'https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl';
+
+        function showStatus(msg, type) {
+            statusDiv.textContent = msg;
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status ' + (type || '');
+        }
+
+        var player = videojs('my_video', {
             html5: {
                 vhs: {
                     overrideNative: true,
-                    limitRenditionByPlayerDimensions: true,
-                    useDevicePixelRatio: true
+                    limitRenditionByPlayerDimensions: true
                 }
             }
         });
 
-        // VAST Ad Tag URL
-        var vastTag = 'https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl';
-
-        var options = {
-            id: 'content_video',
+        // Initialize IMA with the VAST tag
+        player.ima({
+            id: 'my_video',
             adTagUrl: vastTag,
+            debug: true,
             adsRenderingSettings: {
                 enablePreloading: true,
                 useStyledNonLinearAds: true
             },
             adWillPlayMuted: true,
             contribAdsSettings: {
-                debug: true
+                debug: true,
+                timeout: 5000,
+                prerollTimeout: 1000,
+                adLabel: 'Advertisement'
             }
-        };
+        });
 
-        player.ima(options);
-
-        // Auto-play with muted (required by most browsers)
-        player.ready(function() {
-            player.muted(true);
-            player.ima.initializeAdDisplayContainer();
-            player.ima.requestAds();
+        // Event handlers
+        player.on('ready', function() {
+            showStatus('Player ready - requesting ads...', 'loading');
             
-            // Try to play after ads are loaded
-            player.one('adsready', function() {
-                player.play();
-            });
+            // Initialize ad display container
+            player.ima.initializeAdDisplayContainer();
+            
+            // Request ads
+            player.ima.requestAds();
         });
 
-        // Event listeners
-        player.on('ads-ad-started', function() {
-            console.log('Ad started');
-        });
-
-        player.on('ads-ad-ended', function() {
-            console.log('Ad ended');
-        });
-
-        player.on('ads-error', function(event) {
-            console.error('Ad error:', event);
-            // Continue to content if ad fails
+        player.on('adsready', function() {
+            showStatus('Ads loaded - starting playback');
             player.play();
         });
 
-        player.on('error', function() {
-            console.error('Player error:', player.error());
+        player.on('adstart', function() {
+            showStatus('Ad playing...');
         });
+
+        player.on('adend', function() {
+            showStatus('Ad complete');
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
+        });
+
+        player.on('adskip', function() {
+            showStatus('Ad skipped');
+        });
+
+        player.on('aderror', function(event) {
+            console.error('Ad error:', event);
+            showStatus('Ad error - playing content', 'error');
+            
+            // Hide error and play content if available
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+                // Try to play main content
+                if (player.src()) {
+                    player.play();
+                }
+            }, 2000);
+        });
+
+        player.on('error', function() {
+            var error = player.error();
+            console.error('Player error:', error);
+            showStatus('Error: ' + (error ? error.message : 'Unknown'), 'error');
+        });
+
+        // Auto-start on mobile requires user interaction
+        document.body.addEventListener('click', function() {
+            if (player.paused()) {
+                player.play();
+            }
+        }, { once: true });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -215,6 +220,11 @@
                     document.exitFullscreen();
                 }
             }
+        });
+
+        // Initialize
+        player.ready(function() {
+            player.muted(true);
         });
     </script>
 
