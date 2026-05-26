@@ -1,413 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HilltopAds VAST Test Player</title>
-    <link rel="stylesheet" href="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.css">
-    <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #0f1115;
-            background-image: 
-                radial-gradient(1200px 600px at 50% -50px, #1e2235 0%, transparent 60%),
-                radial-gradient(800px 400px at 80% 120%, #1a1625 0%, transparent 50%);
-            color: #ffffff;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            padding: 40px 20px 32px;
-        }
-
-        h1 {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            color: #9ca3af;
-            font-size: 0.95rem;
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 
-                0 4px 14px rgba(124, 58, 237, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 
-                0 8px 20px rgba(124, 58, 237, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        }
-
-        .player-wrapper {
-            position: relative;
-            background: #171923;
-            border-radius: 20px;
-            padding: 12px;
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(255, 255, 255, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            margin-bottom: 24px;
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #000;
-            aspect-ratio: 16 / 9;
-        }
-
-        #video-player {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .info-card {
-            background: rgba(23, 25, 35, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 24px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .info-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #6b7280;
-            font-weight: 600;
-        }
-
-        .info-value {
-            font-size: 0.9rem;
-            color: #e5e7eb;
-            font-weight: 500;
-            font-family: 'SF Mono', Monaco, monospace;
-            word-break: break-all;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #6ee7b7;
-            font-weight: 500;
-            margin-top: 12px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        footer {
-            text-align: center;
-            padding: 32px 20px;
-            color: #4b5563;
-            font-size: 0.85rem;
-        }
-
-        /* Fluid Player dark theme overrides */
-        .fluid_video_wrapper {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }
-
-        @media (max-width: 640px) {
-            header {
-                padding: 24px 16px 20px;
-            }
-            
-            .player-wrapper {
-                padding: 8px;
-                border-radius: 16px;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>HilltopAds VAST Debugger v2</title>
+<script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0b0e14;
+    color: #e6e6e6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid #1e2430;
+  }
+  .logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-weight: 800; color: white;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+  }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .badge {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #111827;
+    border: 1px solid #232b3b;
+    border-radius: 6px;
+    color: #9ca3af;
+  }
+  .panel {
+    background: #11151f;
+    border: 1px solid #1e2430;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+  input[type="text"] {
+    flex: 1;
+    background: #0b0e14;
+    color: #e6e6e6;
+    border: 1px solid #2a3344;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input[type="text"]:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+  }
+  .btn-icon {
+    background: #1a2030;
+    border: 1px solid #2a3344;
+    color: #a5b4fc;
+    border-radius: 10px;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    border: 1px solid #1e2430;
+  }
+  #contentElement {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+  #adContainer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  @media (min-width: 600px) {
+    .controls {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+  button.primary {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.05s, background 0.2s, opacity 0.2s;
+    box-shadow: 0 6px 18px rgba(124,58,237,0.25);
+  }
+  button.primary:hover { background: #6d28d9; }
+  button.primary:active { transform: translateY(1px); }
+  button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary {
+    background: #1a2030;
+    color: #e6e6e6;
+    border: 1px solid #2a3344;
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button.secondary:hover { background: #20283a; }
+  .log-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .log-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; font-weight: 700; }
+  .log-box {
+    background: #05070b;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    height: 240px;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .log-entry { white-space: pre-wrap; word-break: break-all; margin-bottom: 3px; }
+  .t { color: #64748b; margin-right: 8px; }
+  .info { color: #e6e6e6; }
+  .event { color: #a78bfa; }
+  .success { color: #4ade80; }
+  .error { color: #f87171; }
+  .warn { color: #fbbf24; }
+  .note {
+    margin-top: 16px;
+    padding: 12px;
+    background: #0f1420;
+    border: 1px dashed #2a3344;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .note a { color: #a78bfa; text-decoration: none; word-break: break-all; }
+  .note a:hover { text-decoration: underline; }
+  .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #9ca3af;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #374151;
+  }
+  .dot.active { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.5); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>HilltopAds VAST Test Player</h1>
-            <p class="subtitle">Fluid Player • Pre-Roll • Mid-Roll (10s) • Post-Roll</p>
-            <div class="controls">
-                <button class="btn" id="reloadAds">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
-                    </svg>
-                    Reload Ads
-                </button>
-                <button class="btn btn-secondary" id="playVideo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    Play Content
-                </button>
-            </div>
-            <div class="status">
-                <span class="status-dot"></span>
-                Player Ready
-            </div>
-        </header>
+<div class="wrap">
+  <header>
+    <div class="logo">H</div>
+    <h1>HilltopAds VAST Debugger v2</h1>
+    <div class="badge">IMA3 Mobile</div>
+  </header>
 
-        <div class="player-wrapper">
-            <div class="video-container">
-                <video id="video-player" playsinline controls muted>
-                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
-        </div>
-
-        <div class="info-card">
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">VAST Tag</span>
-                    <span class="info-value">mellow-habit.com</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Ad Schedule</span>
-                    <span class="info-value">0s, 10s, End</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Player</span>
-                    <span class="info-value">Fluid Player v3</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Content</span>
-                    <span class="info-value">Big Buck Bunny</span>
-                </div>
-            </div>
-        </div>
+  <div class="panel">
+    <label for="tagUrl">VAST Tag URL</label>
+    <div class="input-row">
+      <input id="tagUrl" type="text" spellcheck="false" value="https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl">
+      <button class="btn-icon" id="clearBtn" title="Clear">✕</button>
     </div>
+  </div>
 
-    <footer>
-        Dark mode test environment for HilltopAds VAST integration
-    </footer>
+  <div class="panel">
+    <div class="video-wrap">
+      <div id="adContainer"></div>
+      <video id="contentElement" playsinline controls muted preload="metadata" poster="https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg">
+        <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="controls">
+      <button class="primary" id="btnAdOnly">Play Ad Only</button>
+      <button class="secondary" id="btnContent">Play Content Only</button>
+      <button class="primary" id="btnBoth">Play Ad + Content</button>
+    </div>
+  </div>
 
-    <script>
-        const VAST_TAG = 'https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl';
-        
-        let player = null;
+  <div class="panel">
+    <div class="log-header">
+      <div class="log-title">Status Log</div>
+      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Idle</span></div>
+    </div>
+    <div id="log" class="log-box"></div>
+    <div class="note">
+      If it spins at 00:00, your VAST likely returned no ad, is blocked by your network (TNM), or by browser adblock. Test with this sample tag: 
+      <a href="#" id="sampleTag">https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=</a>
+    </div>
+  </div>
+</div>
 
-        function initPlayer() {
-            if (player && player.destroy) {
-                try { player.destroy(); } catch(e) {}
-            }
+<script>
+(function() {
+  const video = document.getElementById('contentElement');
+  const adContainer = document.getElementById('adContainer');
+  const tagInput = document.getElementById('tagUrl');
+  const logBox = document.getElementById('log');
+  const btnAdOnly = document.getElementById('btnAdOnly');
+  const btnContent = document.getElementById('btnContent');
+  const btnBoth = document.getElementById('btnBoth');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const clearBtn = document.getElementById('clearBtn');
+  const sampleTag = document.getElementById('sampleTag');
 
-            player = fluidPlayer('video-player', {
-                layoutControls: {
-                    fillToContainer: true,
-                    primaryColor: '#7c3aed',
-                    posterImage: '',
-                    playButtonShowing: true,
-                    playPauseAnimation: true,
-                    autoHide: true,
-                    autoHideTimeout: 3,
-                    animated: true,
-                    controlBar: {
-                        autoHide: true,
-                        autoHideTimeout: 3,
-                        animated: true,
-                        playbackRates: ['x0.5', 'x1', 'x1.25', 'x1.5', 'x2']
-                    },
-                    logo: null,
-                    allowTheatre: true,
-                    controlForwardBackward: true,
-                    doubleclickFullscreen: true
-                },
-                vastOptions: {
-                    adList: [
-                        {
-                            roll: 'preRoll',
-                            vastTag: VAST_TAG,
-                            adText: 'Advertisement'
-                        },
-                        {
-                            roll: 'midRoll',
-                            vastTag: VAST_TAG,
-                            timer: 10,
-                            adText: 'Advertisement'
-                        },
-                        {
-                            roll: 'postRoll',
-                            vastTag: VAST_TAG,
-                            adText: 'Advertisement'
-                        }
-                    ],
-                    adCTAText: 'Visit Advertiser',
-                    adCTATextPosition: 'top right',
-                    adTextPosition: 'top left',
-                    skipButtonCaption: 'Skip in [seconds]',
-                    skipButtonClickCaption: 'Skip Ad',
-                    vastTimeout: 10000,
-                    maxAllowedVastTagRedirects: 3,
-                    showProgressbarMarkers: true,
-                    vastAdvanced: {
-                        vastLoadedCallback: function() {
-                            console.log('VAST loaded');
-                        },
-                        noVastVideoCallback: function() {
-                            console.log('No VAST response');
-                        },
-                        vastVideoSkippedCallback: function() {
-                            console.log('Ad skipped');
-                        },
-                        vastVideoEndedCallback: function() {
-                            console.log('Ad completed');
-                        }
-                    }
-                },
-                autoPlay: true,
-                mute: true,
-                loop: false
-            });
+  let adDisplayContainer;
+  let adsLoader;
+  let adsManager;
+  let imaInitialized = false;
+  let playMode = 'ad-content'; // 'ad-only' | 'content-only' | 'ad-content'
+  let adPlaying = false;
+
+  function ts() {
+    const d = new Date();
+    return d.toLocaleTimeString('en-GB', {hour12: false}) + '.' + String(d.getMilliseconds()).padStart(3,'0');
+  }
+
+  function log(msg, type='info') {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="t">[${ts()}]</span><span class="${type}">${msg}</span>`;
+    logBox.appendChild(entry);
+    logBox.scrollTop = logBox.scrollHeight;
+    console.log(`[VAST] ${msg}`);
+  }
+
+  function setStatus(text, active=false) {
+    statusText.textContent = text;
+    statusDot.classList.toggle('active', active);
+  }
+
+  function initIMA() {
+    if (adsLoader) return;
+    adDisplayContainer = new google.ima.AdDisplayContainer(adContainer, video);
+    adsLoader = new google.ima.AdsLoader(adDisplayContainer);
+    adsLoader.addEventListener(google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED, onAdsManagerLoaded, false);
+    adsLoader.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError, false);
+    video.addEventListener('ended', () => {
+      if (adsLoader) {
+        try { adsLoader.contentComplete(); } catch(e) {}
+      }
+    });
+    log('IMA SDK initialized', 'success');
+  }
+
+  function userInit() {
+    if (!imaInitialized) {
+      try {
+        adDisplayContainer.initialize();
+        imaInitialized = true;
+        log('AdDisplayContainer initialized (user gesture)', 'success');
+        video.muted = true;
+        video.play().then(() => video.pause()).catch(()=>{});
+      } catch(e) {
+        log('Init error: ' + e.message, 'error');
+      }
+    }
+  }
+
+  function destroyAds() {
+    if (adsManager) {
+      try {
+        adsManager.destroy();
+      } catch(e) {}
+      adsManager = null;
+    }
+    adPlaying = false;
+    adContainer.style.display = 'none';
+  }
+
+  function requestAds() {
+    destroyAds();
+    const adTagUrl = tagInput.value.trim();
+    if (!adTagUrl) {
+      log('No VAST URL provided', 'error');
+      return;
+    }
+    
+    userInit();
+    adContainer.style.display = 'block';
+    setStatus('Requesting ad...', true);
+
+    const adsRequest = new google.ima.AdsRequest();
+    adsRequest.adTagUrl = adTagUrl;
+    adsRequest.linearAdSlotWidth = video.clientWidth;
+    adsRequest.linearAdSlotHeight = video.clientHeight;
+    adsRequest.setAdWillAutoPlay(true);
+    adsRequest.setAdWillPlayMuted(true);
+
+    log(`Requesting VAST → ${adTagUrl}`, 'event');
+    try {
+      adsLoader.requestAds(adsRequest);
+    } catch(e) {
+      log('requestAds exception: ' + e.message, 'error');
+      onVastFail();
+    }
+  }
+
+  function onAdsManagerLoaded(e) {
+    log('ADS_MANAGER_LOADED', 'success');
+    const adsRenderingSettings = new google.ima.AdsRenderingSettings();
+    adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
+    adsRenderingSettings.enablePreloading = true;
+
+    adsManager = e.getAdsManager(video, adsRenderingSettings);
+
+    const events = [
+      google.ima.AdEvent.Type.LOADED,
+      google.ima.AdEvent.Type.STARTED,
+      google.ima.AdEvent.Type.FIRST_QUARTILE,
+      google.ima.AdEvent.Type.MIDPOINT,
+      google.ima.AdEvent.Type.THIRD_QUARTILE,
+      google.ima.AdEvent.Type.COMPLETE,
+      google.ima.AdEvent.Type.SKIPPED,
+      google.ima.AdEvent.Type.PAUSED,
+      google.ima.AdEvent.Type.RESUMED,
+      google.ima.AdEvent.Type.CLICK,
+      google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+      google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
+      google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
+      google.ima.AdEvent.Type.LOG
+    ];
+
+    events.forEach(type => {
+      adsManager.addEventListener(type, onAdEvent);
+    });
+    adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError);
+
+    try {
+      const width = video.clientWidth;
+      const height = video.clientHeight;
+      adsManager.init(width, height, google.ima.ViewMode.NORMAL);
+      adsManager.start();
+      setStatus('Ad playing', true);
+    } catch (adError) {
+      log('AdsManager start error: ' + adError, 'error');
+      onVastFail();
+    }
+  }
+
+  function onAdEvent(e) {
+    const type = e.type;
+    switch(type) {
+      case google.ima.AdEvent.Type.LOADED:
+        log('Ad LOADED', 'success');
+        break;
+      case google.ima.AdEvent.Type.STARTED:
+        adPlaying = true;
+        log('STARTED', 'event');
+        setStatus('Ad started', true);
+        break;
+      case google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED:
+        log('CONTENT_PAUSE_REQUESTED', 'event');
+        video.pause();
+        break;
+      case google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED:
+        log('CONTENT_RESUME_REQUESTED', 'event');
+        adPlaying = false;
+        setStatus('Ad ended', false);
+        destroyAds();
+        if (playMode === 'ad-content') {
+          log('Resuming content', 'info');
+          video.play().catch(()=>{});
+        } else {
+          log('Ad-only mode complete', 'info');
+          setStatus('Idle', false);
         }
+        break;
+      case google.ima.AdEvent.Type.COMPLETE:
+        log('COMPLETE', 'event');
+        break;
+      case google.ima.AdEvent.Type.ALL_ADS_COMPLETED:
+        log('ALL_ADS_COMPLETED', 'event');
+        setStatus('Idle', false);
+        break;
+      case google.ima.AdEvent.Type.FIRST_QUARTILE:
+        log('FIRST_QUARTILE', 'event'); break;
+      case google.ima.AdEvent.Type.MIDPOINT:
+        log('MIDPOINT', 'event'); break;
+      case google.ima.AdEvent.Type.THIRD_QUARTILE:
+        log('THIRD_QUARTILE', 'event'); break;
+      case google.ima.AdEvent.Type.SKIPPED:
+        log('SKIPPED', 'warn'); break;
+      case google.ima.AdEvent.Type.CLICK:
+        log('CLICK', 'event'); break;
+      case google.ima.AdEvent.Type.PAUSED:
+        log('Ad PAUSED', 'warn'); break;
+      case google.ima.AdEvent.Type.RESUMED:
+        log('Ad RESUMED', 'event'); break;
+      case google.ima.AdEvent.Type.LOG:
+        const adData = e.getAdData();
+        if (adData && adData.adError) {
+          log('Ad LOG: ' + adData.adError.getMessage(), 'warn');
+        }
+        break;
+    }
+  }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initPlayer();
+  function onAdError(e) {
+    const err = e.getError ? e.getError() : e;
+    const msg = err && err.getMessage ? err.getMessage() : String(err);
+    log('AD_ERROR: ' + msg, 'error');
+    onVastFail();
+  }
 
-            document.getElementById('reloadAds').addEventListener('click', function() {
-                const videoEl = document.getElementById('video-player');
-                const currentTime = videoEl.currentTime;
-                
-                // Destroy and recreate for fresh ad request
-                const container = videoEl.parentElement;
-                const newVideo = document.createElement('video');
-                newVideo.id = 'video-player';
-                newVideo.setAttribute('playsinline', '');
-                newVideo.setAttribute('controls', '');
-                newVideo.setAttribute('muted', '');
-                newVideo.innerHTML = '<source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">';
-                
-                container.innerHTML = '';
-                container.appendChild(newVideo);
-                
-                setTimeout(initPlayer, 100);
-            });
+  function onVastFail() {
+    setStatus('VAST failed', false);
+    log('VAST failed - check tag, adblock, or network block', 'error');
+    destroyAds();
+    if (playMode === 'ad-content') {
+      log('Fallback: playing content', 'warn');
+      video.play().catch(()=>{});
+    }
+  }
 
-            document.getElementById('playVideo').addEventListener('click', function() {
-                if (player) {
-                    player.play();
-                }
-            });
-        });
+  // Button handlers
+  btnAdOnly.addEventListener('click', () => {
+    playMode = 'ad-only';
+    video.pause();
+    video.currentTime = 0;
+    log('--- Play Ad Only ---', 'info');
+    requestAds();
+  });
 
-        // Handle visibility change to pause when tab hidden
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && player) {
-                player.pause();
-            }
-        });
-    </script>
+  btnContent.addEventListener('click', () => {
+    playMode = 'content-only';
+    log('--- Play Content Only ---', 'info');
+    destroyAds();
+    userInit();
+    video.muted = false;
+    video.play().catch(err => {
+      log('Content play blocked: ' + err.message, 'error');
+      video.muted = true;
+      video.play();
+    });
+    setStatus('Content playing', true);
+  });
+
+  btnBoth.addEventListener('click', () => {
+    playMode = 'ad-content';
+    video.pause();
+    video.currentTime = 0;
+    log('--- Play Ad + Content ---', 'info');
+    requestAds();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    tagInput.value = '';
+    tagInput.focus();
+  });
+
+  sampleTag.addEventListener('click', (e) => {
+    e.preventDefault();
+    tagInput.value = sampleTag.textContent;
+    log('Sample Google VAST loaded into input', 'success');
+  });
+
+  window.addEventListener('resize', () => {
+    if (adsManager && adPlaying) {
+      try {
+        adsManager.resize(video.clientWidth, video.clientHeight, google.ima.ViewMode.NORMAL);
+      } catch(e) {}
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initIMA();
+    log('HilltopAds VAST Debugger v2 ready', 'success');
+    log('Video muted for mobile autoplay. Tap "Play Content Only" to unmute.', 'info');
+    setStatus('Ready', false);
+  });
+
+  // iOS unlock
+  document.body.addEventListener('touchstart', function firstTouch() {
+    userInit();
+    document.body.removeEventListener('touchstart', firstTouch);
+  }, {once: true});
+
+})();
+</script>
 </body>
-        </html>
+    </html>
