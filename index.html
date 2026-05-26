@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VAST Video Player - Fixed</title>
-    
-    <!-- Video.js CSS -->
-    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    
+    <title>HilltopAds VAST Test Player</title>
+    <link rel="stylesheet" href="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.css">
+    <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,217 +17,397 @@
         }
 
         body {
-            background: #0a0a0a;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #0f1115;
+            background-image: 
+                radial-gradient(1200px 600px at 50% -50px, #1e2235 0%, transparent 60%),
+                radial-gradient(800px 400px at 80% 120%, #1a1625 0%, transparent 50%);
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
 
-        .player-container {
+        .container {
             width: 100%;
-            max-width: 960px;
-            background: #000;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px 32px;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 
+                0 4px 14px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 20px rgba(124, 58, 237, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .player-wrapper {
+            position: relative;
+            background: #171923;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.8);
+            background: #000;
+            aspect-ratio: 16 / 9;
         }
 
-        .video-js {
+        #video-player {
             width: 100%;
-            height: auto;
-            aspect-ratio: 16/9;
+            height: 100%;
+            display: block;
         }
 
-        .video-js .vjs-big-play-button {
-            background: rgba(0, 150, 255, 0.8);
-            border: none;
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            line-height: 80px;
-            font-size: 40px;
-            transition: all 0.3s ease;
+        .info-card {
+            background: rgba(23, 25, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
         }
 
-        .video-js .vjs-big-play-button:hover {
-            background: rgba(0, 150, 255, 1);
-            transform: scale(1.1);
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
         }
 
-        .ad-info {
-            padding: 15px 20px;
-            background: #1a1a1a;
-            color: #fff;
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .ad-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+        .info-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            font-weight: 600;
         }
 
-        .ad-info p {
-            color: #888;
-            font-size: 0.85rem;
+        .info-value {
+            font-size: 0.9rem;
+            color: #e5e7eb;
+            font-weight: 500;
+            font-family: 'SF Mono', Monaco, monospace;
+            word-break: break-all;
         }
 
         .status {
-            padding: 10px 20px;
-            background: #222;
-            color: #0f0;
-            font-family: monospace;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
             font-size: 0.8rem;
-            display: none;
+            color: #6ee7b7;
+            font-weight: 500;
+            margin-top: 12px;
         }
 
-        .status.error {
-            color: #f44;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
-        .status.loading {
-            display: block;
-            color: #ff0;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 32px 20px;
+            color: #4b5563;
+            font-size: 0.85rem;
+        }
+
+        /* Fluid Player dark theme overrides */
+        .fluid_video_wrapper {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding: 24px 16px 20px;
+            }
+            
+            .player-wrapper {
+                padding: 8px;
+                border-radius: 16px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>HilltopAds VAST Test Player</h1>
+            <p class="subtitle">Fluid Player • Pre-Roll • Mid-Roll (10s) • Post-Roll</p>
+            <div class="controls">
+                <button class="btn" id="reloadAds">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                    </svg>
+                    Reload Ads
+                </button>
+                <button class="btn btn-secondary" id="playVideo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Play Content
+                </button>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                Player Ready
+            </div>
+        </header>
 
-    <div class="player-container">
-        <div id="status" class="status">Loading...</div>
-        <video id="my_video" class="video-js vjs-default-skin" controls preload="auto" playsinline>
-            <p class="vjs-no-js">Please enable JavaScript to view this video.</p>
-        </video>
-        
-        <div class="ad-info">
-            <h3>VAST Ad Player</h3>
-            <p>HilltopAds VAST Tag • Fixed Version</p>
+        <div class="player-wrapper">
+            <div class="video-container">
+                <video id="video-player" playsinline controls muted>
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">VAST Tag</span>
+                    <span class="info-value">mellow-habit.com</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ad Schedule</span>
+                    <span class="info-value">0s, 10s, End</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Player</span>
+                    <span class="info-value">Fluid Player v3</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Content</span>
+                    <span class="info-value">Big Buck Bunny</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Video.js -->
-    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
-    
-    <!-- Google IMA SDK -->
-    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-    
-    <!-- Video.js IMA Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/videojs-ima@1.11.0/dist/videojs.ima.min.js"></script>
+    <footer>
+        Dark mode test environment for HilltopAds VAST integration
+    </footer>
 
     <script>
-        var statusDiv = document.getElementById('status');
-        var vastTag = 'https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl';
+        const VAST_TAG = 'https://mellow-habit.com/d.mNFnz/ddGaNCvEZMG/UO/fe_m/9NumZGUml/k/PITLcnw/NmzncBz-McD/UJtWNbzYAg3LNszGMSw/OOQl';
+        
+        let player = null;
 
-        function showStatus(msg, type) {
-            statusDiv.textContent = msg;
-            statusDiv.style.display = 'block';
-            statusDiv.className = 'status ' + (type || '');
+        function initPlayer() {
+            if (player && player.destroy) {
+                try { player.destroy(); } catch(e) {}
+            }
+
+            player = fluidPlayer('video-player', {
+                layoutControls: {
+                    fillToContainer: true,
+                    primaryColor: '#7c3aed',
+                    posterImage: '',
+                    playButtonShowing: true,
+                    playPauseAnimation: true,
+                    autoHide: true,
+                    autoHideTimeout: 3,
+                    animated: true,
+                    controlBar: {
+                        autoHide: true,
+                        autoHideTimeout: 3,
+                        animated: true,
+                        playbackRates: ['x0.5', 'x1', 'x1.25', 'x1.5', 'x2']
+                    },
+                    logo: null,
+                    allowTheatre: true,
+                    controlForwardBackward: true,
+                    doubleclickFullscreen: true
+                },
+                vastOptions: {
+                    adList: [
+                        {
+                            roll: 'preRoll',
+                            vastTag: VAST_TAG,
+                            adText: 'Advertisement'
+                        },
+                        {
+                            roll: 'midRoll',
+                            vastTag: VAST_TAG,
+                            timer: 10,
+                            adText: 'Advertisement'
+                        },
+                        {
+                            roll: 'postRoll',
+                            vastTag: VAST_TAG,
+                            adText: 'Advertisement'
+                        }
+                    ],
+                    adCTAText: 'Visit Advertiser',
+                    adCTATextPosition: 'top right',
+                    adTextPosition: 'top left',
+                    skipButtonCaption: 'Skip in [seconds]',
+                    skipButtonClickCaption: 'Skip Ad',
+                    vastTimeout: 10000,
+                    maxAllowedVastTagRedirects: 3,
+                    showProgressbarMarkers: true,
+                    vastAdvanced: {
+                        vastLoadedCallback: function() {
+                            console.log('VAST loaded');
+                        },
+                        noVastVideoCallback: function() {
+                            console.log('No VAST response');
+                        },
+                        vastVideoSkippedCallback: function() {
+                            console.log('Ad skipped');
+                        },
+                        vastVideoEndedCallback: function() {
+                            console.log('Ad completed');
+                        }
+                    }
+                },
+                autoPlay: true,
+                mute: true,
+                loop: false
+            });
         }
 
-        var player = videojs('my_video', {
-            html5: {
-                vhs: {
-                    overrideNative: true,
-                    limitRenditionByPlayerDimensions: true
-                }
-            }
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            initPlayer();
 
-        // Initialize IMA with the VAST tag
-        player.ima({
-            id: 'my_video',
-            adTagUrl: vastTag,
-            debug: true,
-            adsRenderingSettings: {
-                enablePreloading: true,
-                useStyledNonLinearAds: true
-            },
-            adWillPlayMuted: true,
-            contribAdsSettings: {
-                debug: true,
-                timeout: 5000,
-                prerollTimeout: 1000,
-                adLabel: 'Advertisement'
-            }
-        });
+            document.getElementById('reloadAds').addEventListener('click', function() {
+                const videoEl = document.getElementById('video-player');
+                const currentTime = videoEl.currentTime;
+                
+                // Destroy and recreate for fresh ad request
+                const container = videoEl.parentElement;
+                const newVideo = document.createElement('video');
+                newVideo.id = 'video-player';
+                newVideo.setAttribute('playsinline', '');
+                newVideo.setAttribute('controls', '');
+                newVideo.setAttribute('muted', '');
+                newVideo.innerHTML = '<source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">';
+                
+                container.innerHTML = '';
+                container.appendChild(newVideo);
+                
+                setTimeout(initPlayer, 100);
+            });
 
-        // Event handlers
-        player.on('ready', function() {
-            showStatus('Player ready - requesting ads...', 'loading');
-            
-            // Initialize ad display container
-            player.ima.initializeAdDisplayContainer();
-            
-            // Request ads
-            player.ima.requestAds();
-        });
-
-        player.on('adsready', function() {
-            showStatus('Ads loaded - starting playback');
-            player.play();
-        });
-
-        player.on('adstart', function() {
-            showStatus('Ad playing...');
-        });
-
-        player.on('adend', function() {
-            showStatus('Ad complete');
-            setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
-        });
-
-        player.on('adskip', function() {
-            showStatus('Ad skipped');
-        });
-
-        player.on('aderror', function(event) {
-            console.error('Ad error:', event);
-            showStatus('Ad error - playing content', 'error');
-            
-            // Hide error and play content if available
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-                // Try to play main content
-                if (player.src()) {
+            document.getElementById('playVideo').addEventListener('click', function() {
+                if (player) {
                     player.play();
                 }
-            }, 2000);
+            });
         });
 
-        player.on('error', function() {
-            var error = player.error();
-            console.error('Player error:', error);
-            showStatus('Error: ' + (error ? error.message : 'Unknown'), 'error');
-        });
-
-        // Auto-start on mobile requires user interaction
-        document.body.addEventListener('click', function() {
-            if (player.paused()) {
-                player.play();
+        // Handle visibility change to pause when tab hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && player) {
+                player.pause();
             }
-        }, { once: true });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.code === 'Space' && document.activeElement.tagName !== 'BUTTON') {
-                e.preventDefault();
-                player.paused() ? player.play() : player.pause();
-            }
-            if (e.code === 'KeyF') {
-                if (!document.fullscreenElement) {
-                    player.requestFullscreen();
-                } else {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        // Initialize
-        player.ready(function() {
-            player.muted(true);
         });
     </script>
-
 </body>
-</html>
+        </html>
