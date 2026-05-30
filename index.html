@@ -482,121 +482,16 @@ function loadMyWithdrawals() { try { var user; try { user = localStorage.getItem
 function startGame(type) { currentGame = type; document.getElementById('playPage').classList.add('active'); var pages = document.querySelectorAll('.page'); for (var i = 0; i < pages.length; i++) { if (pages[i].id!== 'playPage') pages[i].classList.remove('active'); } setGameAdsVisible(false); document.getElementById('gameTitle').innerText = type.charAt(0).toUpperCase() + type.slice(1); if (type === 'flappy') startFlappyBird(); else if (type === 'temple') startTempleRun(); else if (type === 'memory') startMemoryMatch(); else if (type === 'color') startColorMatch(); else if (type === 'math') startMathChallenge(); else if (type === 'checkers') startCheckers(); }
 
 // ===== FLAPPY BIRD EXTREME =====
-function startFlappyBird() {
-  var html = '<h3>Flappy Bird Extreme</h3><p style="color:#ccc">Tap/Click to make the bird fly. Avoid pipes!</p><canvas id="flappyCanvas" width="360" height="500" style="width:100%;max-width:400px;background:#000;border-radius:15px;border:2px solid #00ffcc;touch-action:none"></canvas>';
-  document.getElementById('gameArea').innerHTML = html;
-  var c = document.getElementById('flappyCanvas'), ctx = c.getContext('2d');
-  var W = 360, H = 500;
+// ===== FLAPPY BIRD EXTREME UPGRADED (ONE-CLICK INSTALL) =====
+(function(){
+  var grid=document.getElementById("gamesGrid");if(grid){var card=document.createElement('div');card.className='game-card';card.setAttribute('data-game','flappy');card.innerHTML='<div class="game-icon">🐦</div><h4>Flappy Bird Extreme</h4><div class="game-reward">+5-25 coins</div>';grid.prepend(card);card.onclick=function(){startGame('flappy')};}
+  var origStartGame=window.startGame;
+  window.startGame=function(type){if(type==='flappy'){currentGame=type;document.getElementById('playPage').classList.add('active');var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){if(pages[i].id!=='playPage')pages[i].classList.remove('active')}setGameAdsVisible(false);document.getElementById('gameTitle').innerText='Flappy Bird Extreme';startFlappyBird();}else{origStartGame(type);}};
+})();
 
-  // Bird
-  var bird = { x: 60, y: 200, vy: 0, w: 24, h: 24, gravity: 0.6, jump: -9 };
-  // Pipes
-  var pipes = [];
-  var gap = 200;
-  var pipeW = 40;
-  var score = 0;
-  var playing = true;
-  var frame = 0;
+function startFlappyBird(){var html='<canvas id="flappyCanvas" width="360" height="540" style="width:100%;max-width:400px;background:#000;border-radius:15px;touch-action:none;display:block;margin:0 auto;box-shadow:0 0 30px rgba(255,140,0,0.3)"></canvas>';document.getElementById('gameArea').innerHTML=html;var c=document.getElementById('flappyCanvas'),ctx=c.getContext('2d');var W=360,H=540;var ST={MENU:0,PLAY:1,DYING:2,DEAD:3};var state=ST.MENU,score=0,best=0;try{best=parseInt(localStorage.getItem('flappyBest')||'0')}catch(e){}var gravity=0.42,jumpForce=-7.8,baseSpeed=2.8,speed=baseSpeed,pipeGap=155,pipeW=55,groundH=60;var bird={x:80,y:200,vy:0,rot:0,wing:0};var pipes=[],particles=[],popups=[];var frame=0,ended=false;var groundX=0,cloudX=0,mtX=0,hillX=0;var mt=[],hl=[];for(var i=0;i<200;i++){mt.push(Math.sin(i*0.05)*30+Math.sin(i*0.02)*50);hl.push(Math.sin(i*0.08)*20+Math.cos(i*0.03)*15)}function reset(){bird={x:80,y:200,vy:0,rot:0,wing:0};pipes=[];particles=[];popups=[];score=0;speed=baseSpeed;pipeGap=155;ended=false;state=ST.MENU}function flap(){if(state===ST.MENU){state=ST.PLAY;bird.vy=jumpForce;bird.wing=0;return}if(state===ST.PLAY){bird.vy=jumpForce;bird.wing=0;return}if(state===ST.DEAD){reset()}}function die(){if(ended)return;state=ST.DYING;for(var i=0;i<18;i++){particles.push({x:bird.x,y:bird.y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*5,life:1,c:['#ffd700','#ffb300','#ff8f00','#fff8e1'][Math.floor(Math.random()*4)],sz:2+Math.random()*4})}}function update(){frame++;if(state===ST.MENU){bird.y=200+Math.sin(frame*0.05)*15;bird.rot=Math.sin(frame*0.05)*0.1;bird.wing+=0.15;groundX=(groundX+1)%24;cloudX+=0.3;mtX+=0.2;hillX+=0.5;return}if(state===ST.DYING){bird.vy+=gravity*1.5;bird.y+=bird.vy;bird.rot=Math.min(Math.PI/2,bird.rot+0.12);for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life-=0.025;if(p.life<=0)particles.splice(i,1)}if(bird.y>H-groundH-10){bird.y=H-groundH-10;ended=true;state=ST.DEAD;if(score>best){best=score;try{localStorage.setItem('flappyBest',best)}catch(e){}}setTimeout(function(){var coins=Math.min(25,5+score*2);handleGameEnd(coins,'🐦 Flappy Complete!','<p>Score: '+score+'</p><p>Best: '+best+'</p>','startFlappyBird')},700)}return}if(state!==ST.PLAY)return;bird.vy+=gravity;bird.y+=bird.vy;bird.wing+=bird.vy<0?0.35:0.12;var tgt=bird.vy*3.5*Math.PI/180;tgt=Math.max(-0.45,Math.min(1.3,tgt));bird.rot+=(tgt-bird.rot)*0.15;groundX=(groundX+speed)%24;cloudX+=0.3;mtX+=0.2;hillX+=0.5;if(frame%80===0){var topH=60+Math.random()*(H-groundH-pipeGap-120);pipes.push({x:W,topH:topH,scored:false})}for(var i=pipes.length-1;i>=0;i--){pipes[i].x-=speed;if(pipes[i].x+pipeW<0){pipes.splice(i,1);continue}if(!pipes[i].scored&&pipes[i].x+pipeW<bird.x-5){pipes[i].scored=true;score++;popups.push({x:bird.x,y:bird.y-25,life:45});if(score%5===0&&speed<5){speed+=0.15;pipeGap=Math.max(130,pipeGap-3)}}var bx=bird.x-11,by=bird.y-9,bw=22,bh=18;var px=pipes[i].x+4,pt=pipes[i].topH;if(bx+bw>px&&bx<px+pipeW-8){if(by<pt-2||by+bh>pt+pipeGap+2){die();return}}}if(bird.y<-5){bird.y=-5;bird.vy=0}if(bird.y>H-groundH-10){bird.y=H-groundH-10;die();return}for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life-=0.025;if(p.life<=0)particles.splice(i,1)}for(var i=popups.length-1;i>=0;i--){popups[i].y-=1.2;popups[i].life--;if(popups[i].life<=0)popups.splice(i,1)}}function drawBg(){var g=ctx.createLinearGradient(0,0,0,H-groundH);g.addColorStop(0,'#0b0c2a');g.addColorStop(0.3,'#2a1050');g.addColorStop(0.55,'#c2185b');g.addColorStop(0.8,'#e65100');g.addColorStop(1,'#ff8f00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H-groundH);ctx.save();ctx.shadowBlur=60;ctx.shadowColor='#ffcc00';ctx.fillStyle='#ffcc00';ctx.beginPath();ctx.arc(W-70,H-groundH-60,25,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='rgba(255,200,200,0.35)';ctx.beginPath();ctx.arc((80-cloudX)%W,70,22,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc((60-cloudX)%W,65,16,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc((280-cloudX)%W,100,25,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc((260-cloudX)%W,95,18,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a0533';ctx.beginPath();ctx.moveTo(0,H-groundH);for(var i=0;i<200;i++)ctx.lineTo(i*2-(mtX%2),H-groundH-55-mt[i]);ctx.lineTo(W,H-groundH);ctx.closePath();ctx.fill();ctx.fillStyle='#0d2b0d';ctx.beginPath();ctx.moveTo(0,H-groundH);for(var i=0;i<200;i++)ctx.lineTo(i*2-(hillX%2),H-groundH-25-hl[i]);ctx.lineTo(W,H-groundH);ctx.closePath();ctx.fill()}function drawGround(){ctx.fillStyle='#8d6e63';ctx.fillRect(0,H-groundH,W,groundH);ctx.fillStyle='#66bb6a';ctx.fillRect(0,H-groundH,W,14);ctx.fillStyle='#43a047';for(var i=0;i<W+24;i+=24)ctx.fillRect(i-groundX,H-groundH,12,14)}function drawPipe(px,topH){var by=topH+pipeGap;var bodyW=pipeW-10;var pg=ctx.createLinearGradient(px,0,px+pipeW,0);pg.addColorStop(0,'#2e7d32');pg.addColorStop(0.3,'#81c784');pg.addColorStop(0.7,'#4caf50');pg.addColorStop(1,'#1b5e20');ctx.fillStyle=pg;ctx.fillRect(px+5,0,bodyW,topH-22);var cg=ctx.createLinearGradient(px,0,px+pipeW,0);cg.addColorStop(0,'#2e7d32');cg.addColorStop(0.2,'#a5d6a7');cg.addColorStop(0.5,'#66bb6a');cg.addColorStop(1,'#1b5e20');ctx.fillStyle=cg;ctx.fillRect(px,topH-26,pipeW,26);ctx.strokeStyle='#1b5e20';ctx.lineWidth=2;ctx.strokeRect(px,topH-26,pipeW,26);ctx.fillStyle=pg;ctx.fillRect(px+5,by+26,bodyW,H-groundH-by-26);ctx.fillStyle=cg;ctx.fillRect(px,by,pipeW,26);ctx.strokeRect(px,by,pipeW,26)}function drawBird(){ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(2,2,16,12,0,0,Math.PI*2);ctx.fill();var bg=ctx.createRadialGradient(-3,-3,2,0,0,16);bg.addColorStop(0,'#ffee58');bg.addColorStop(1,'#f9a825');ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(0,0,16,13,0,0,Math.PI*2);ctx.fill();var wy=Math.sin(bird.wing)*5;ctx.fillStyle='#f57f17';ctx.beginPath();ctx.ellipse(-4,wy,9,6,-0.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(7,-4,5.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(9,-4,2.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(10,-5.5,1,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff5722';ctx.beginPath();ctx.moveTo(13,-1);ctx.lineTo(21,3);ctx.lineTo(13,6);ctx.closePath();ctx.fill();ctx.restore()}function drawFx(){for(var i=0;i<particles.length;i++){var p=particles[i];ctx.globalAlpha=p.life;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';for(var i=0;i<popups.length;i++){ctx.globalAlpha=popups[i].life/45;ctx.fillText('+1',popups[i].x,popups[i].y)}ctx.globalAlpha=1;ctx.textAlign='left'}function drawMenu(){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 40px Arial';ctx.textAlign='center';ctx.fillText('Flappy Bird',W/2,190);ctx.font='18px Arial';ctx.fillText('Tap or Click to Start',W/2,240);if(best>0){ctx.fillStyle='#ffd700';ctx.fillText('Best: '+best,W/2,280)}ctx.textAlign='left'}function drawScore(){ctx.save();ctx.textAlign='center';ctx.font='bold 42px Arial';ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillText(score,W/2+2,62);ctx.fillStyle='#fff';ctx.fillText(score,W/2,60);ctx.restore()}function loop(){update();drawBg();for(var i=0;i<pipes.length;i++)drawPipe(pipes[i].x,pipes[i].topH);drawGround();drawBird();drawFx();if(state===ST.PLAY||state===ST.DYING)drawScore();if(state===ST.MENU)drawMenu();if(!ended)requestAnimationFrame(loop)}c.addEventListener('click',flap);c.addEventListener('touchstart',function(e){e.preventDefault();flap()},{passive:false});var kh=function(e){if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flap()}};window.addEventListener('keydown',kh);gameState.cleanup=function(){window.removeEventListener('keydown',kh)};reset();loop()}
 
-  // Reset
-  function reset() {
-    bird.y = 200; bird.vy = 0;
-    pipes = [];
-    score = 0;
-    playing = true;
-    frame = 0;
-  }
-
-  // Spawn pipes
-  function spawnPipe() {
-    var topH = 60 + Math.random() * (H - gap - 120);
-    pipes.push({ x: W, topH: topH, scored: false });
-  }
-
-  // Update
-  function update() {
-    if (!playing) return;
-    frame++;
-    // Bird physics
-    bird.vy += bird.gravity;
-    bird.y += bird.vy;
-    // Check ceiling/floor
-    if (bird.y < 0) { bird.y = 0; bird.vy = 0; }
-    if (bird.y + bird.h > H) { playing = false; setTimeout(endGame, 200); return; }
-
-    // Spawn pipes every 70 frames
-    if (frame % 70 === 0) spawnPipe();
-
-    // Move pipes
-    for (var i = pipes.length - 1; i >= 0; i--) {
-      pipes[i].x -= 3;
-      if (pipes[i].x + pipeW < 0) { pipes.splice(i, 1); continue; }
-      // Collision detection
-      var p = pipes[i];
-      // Bird vs pipe
-      if (bird.x + bird.w > p.x && bird.x < p.x + pipeW) {
-        if (bird.y < p.topH || bird.y + bird.h > p.topH + gap) {
-          playing = false;
-          setTimeout(endGame, 200);
-          return;
-        }
-      }
-      // Score when bird passes pipe
-      if (!p.scored && bird.x > p.x + pipeW) {
-        p.scored = true;
-        score++;
-      }
-    }
-  }
-
-  // Draw
-  function draw() {
-    // Sky gradient
-    var grad = ctx.createLinearGradient(0,0,0,H);
-    grad.addColorStop(0,'#1a1a3e'); grad.addColorStop(0.5,'#0a0a2e'); grad.addColorStop(1,'#000');
-    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
-
-    // Pipes
-    for (var i = 0; i < pipes.length; i++) {
-      var p = pipes[i];
-      ctx.fillStyle = '#2ecc71'; ctx.fillRect(p.x, 0, pipeW, p.topH);
-      ctx.fillRect(p.x, p.topH + gap, pipeW, H - p.topH - gap);
-      ctx.fillStyle = '#27ae60'; ctx.fillRect(p.x - 3, p.topH - 15, pipeW + 6, 15);
-      ctx.fillRect(p.x - 3, p.topH + gap, pipeW + 6, 15);
-    }
-
-    // Bird (neon)
-    ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 15;
-    ctx.fillStyle = '#f1c40f'; ctx.fillRect(bird.x, bird.y, bird.w, bird.h);
-    ctx.shadowBlur = 0;
-    // Eye
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bird.x + 16, bird.y + 6, 5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(bird.x + 18, bird.y + 6, 2, 0, Math.PI*2); ctx.fill();
-
-    // Score
-    ctx.fillStyle = '#ffd700'; ctx.font = 'bold 24px Arial'; ctx.fillText('Score: ' + score, 10, 30);
-  }
-
-  // Game loop
-  function loop() { update(); draw(); if (playing) requestAnimationFrame(loop); }
-
-  // Fly action
-  function fly() { if (playing) { bird.vy = bird.jump; } }
-
-  // End game
-  function endGame() {
-    handleGameEnd(5, '🐦 Flappy Complete!', '<p>Score: ' + score + '</p>', 'startFlappyBird');
-  }
-
-  // Events
-  c.addEventListener('click', function(e) { fly(); });
-  c.addEventListener('touchstart', function(e) { e.preventDefault(); fly(); }, {passive:false});
-  window.addEventListener('keydown', function(e) { if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); fly(); } });
-
-  gameState.cleanup = function() { /* nothing special */ };
-
-  reset();
-  loop();
+    
 }
 
 // ===== EXISTING GAMES (unchanged) =====
