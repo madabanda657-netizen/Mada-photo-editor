@@ -1877,3 +1877,244 @@ function startUploadedSongPlayback(index){if(index<0||index>=uploadedSongs.lengt
 
 var hilltopPlayerInstance=null;var watchAdIsPlaying=false;
 function initHilltopPlayer(){if(hilltopPlayerInstance||document.getElementById('hilltopVideoPlayer').dataset.init==='true')return;if(watchVideosToday>=WATCH_DAILY_LIMIT)return;var vastTagUrl="https://mellow-habit.com/dmmHFnzEd.GtNmvbZuGxUy/IezmW9_ulZKUPlrkqPnTbcHwFNMz/cBzuMBD/Uxt-Nvz/AC3ON/zTMcwMONQx";hilltopPlayerInstance=fluidPlayer('hilltopVideoPlayer',{vastOptions:{adList:[{roll:'preRoll',vastTag:vastTag
+var hilltopPlayerInstance=null;var watchAdIsPlaying=false;
+function initHilltopPlayer(){if(hilltopPlayerInstance||document.getElementById('hilltopVideoPlayer').dataset.init==='true')return;if(watchVideosToday>=WATCH_DAILY_LIMIT)return;var vastTagUrl="https://mellow-habit.com/dmmHFnzEd.GtNmvbZuGxUy/IezmW9_ulZKUPlrkqPnTbcHwFNMz/cBzuMBD/Uxt-Nvz/AC3ON/zTMcwMONQx";hilltopPlayerInstance=fluidPlayer('hilltopVideoPlayer',{vastOptions:{adList:[{roll:'preRoll',vastTag:vastTagUrl}],adClickable:true,adCTAText:'Visit Sponsor',skipButtonCaption:'Skip in [seconds]',skipButtonClickCaption:'Skip Ad',skip:10}});document.getElementById('hilltopVideoPlayer').dataset.init='true';hilltopPlayerInstance.on('adStarted',function(){watchAdIsPlaying=true;document.getElementById('watchStatus').innerHTML='<span style="color:#ffd700;font-weight:bold">📺 Ad is playing... Do not close!</span>'});hilltopPlayerInstance.on('adEnded',function(){watchAdIsPlaying=false;if(watchVideosToday>=WATCH_DAILY_LIMIT){document.getElementById('watchStatus').innerHTML='<span style="color:#ff6b6b;font-weight:bold">🚫 Daily limit reached!</span>';return}document.getElementById('watchStatus').innerHTML='<span style="color:#ffd700;font-weight:bold">📺 Ad finished! Keep watching to earn coins.</span>';startWatchFallback()});hilltopPlayerInstance.on('adSkipped',function(){watchAdIsPlaying=false;document.getElementById('watchStatus').innerHTML='<span style="color:#ff6b6b;font-weight:bold">⚠ Ad skipped! Keep watching.</span>';startWatchFallback()});hilltopPlayerInstance.on('noAdLoaded',function(){watchAdIsPlaying=false;document.getElementById('watchStatus').innerHTML='<span style="color:#ffd700">📺 No ad available. Watch the full video to earn!</span>';startWatchFallback()});hilltopPlayerInstance.on('adError',function(){watchAdIsPlaying=false;document.getElementById('watchStatus').innerHTML='<span style="color:#ffd700">📺 Ad error. Watch the full video to earn!</span>';startWatchFallback()});var videoEl=document.getElementById('hilltopVideoPlayer');videoEl.addEventListener('play',function(){if(watchCooldownActive||watchRewardGiven||watchVideosToday>=WATCH_DAILY_LIMIT)return;if(watchAdIsPlaying)return;watchVideoIsPlaying=true;document.getElementById('watchStatus').innerHTML='<span style="color:#ffd700">Video playing... Watch to the end to earn +10 coins!</span>';startWatchFallback()});videoEl.addEventListener('pause',function(){watchVideoIsPlaying=false;if(!watchRewardGiven&&!watchCooldownActive&&watchVideosToday<WATCH_DAILY_LIMIT&&!watchAdIsPlaying){document.getElementById('watchStatus').innerHTML='<span style="color:#ff6b6b">Video paused! Press play to continue watching</span>'}});videoEl.addEventListener('ended',function(){watchVideoIsPlaying=false;if(watchAdIsPlaying)return;var cur=videoEl.currentTime||0;var dur=videoEl.duration||0;if(dur>1&&cur>=dur-3){autoRewardWatch()}});videoEl.addEventListener('loadedmetadata',function(){if(videoEl.duration&&isFinite(videoEl.duration)&&videoEl.duration>1){watchKnownDuration=videoEl.duration}})}
+
+// FIXED: Better DOMContentLoaded with auto-login
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Firebase first
+  initFirebase();
+  
+  // Generate captcha
+  generateCaptcha();
+  
+  // Check for saved payment method
+  setTimeout(function(){
+    var savedNum=localStorage.getItem('number');
+    var savedNet=localStorage.getItem('network');
+    if(savedNum&&savedNet){
+      lockPaymentMethod(savedNum,savedNet);
+    }else if(savedNum||savedNet){
+      lockPaymentMethod(savedNum||'',savedNet||'');
+    }
+  },300);
+
+  // FIXED: Set up login button with proper event handling
+  var loginBtn=document.getElementById("loginBtn");
+  if(loginBtn){
+    loginBtn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      register();
+    });
+  }
+
+  // Username input - Enter key support
+  var usernameInput=document.getElementById("usernameInput");
+  if(usernameInput){
+    usernameInput.addEventListener('keypress',function(e){
+      if(e.key==='Enter'){
+        e.preventDefault();
+        if(document.getElementById('loginBtn').innerText === 'Login') {
+          login();
+        } else {
+          register();
+        }
+      }
+    });
+    // Auto-focus after splash
+    setTimeout(function(){ 
+      usernameInput.focus(); 
+    }, 2800);
+  }
+
+  // Phone input validation
+  var phoneInput=document.getElementById("phoneInput");
+  if(phoneInput){
+    phoneInput.addEventListener('input',function(e){
+      this.value=this.value.replace(/[^0-9]/g,'');
+    });
+    phoneInput.addEventListener('keypress',function(e){
+      if(!/[0-9]/.test(e.key))e.preventDefault();
+    });
+  }
+
+  // Password input - Enter key support
+  var passwordInput = document.getElementById("passwordInput");
+  if(passwordInput) {
+    passwordInput.addEventListener('keypress', function(e) {
+      if(e.key === 'Enter') {
+        e.preventDefault();
+        if(document.getElementById('loginBtn').innerText === 'Login') {
+          login();
+        } else {
+          register();
+        }
+      }
+    });
+  }
+
+  // Navigation buttons
+  var backBtn = document.getElementById("backBtn");
+  if(backBtn) {
+    backBtn.onclick = function() {
+      if(gameState && gameState.cleanup) gameState.cleanup();
+      currentGame = null;
+      gameState = {};
+      showPage('games');
+    };
+  }
+
+  // Nav buttons
+  var navWallet = document.getElementById("navWallet");
+  if(navWallet) navWallet.onclick = function() { showPage('wallet'); };
+
+  var navGames = document.getElementById("navGames");
+  if(navGames) navGames.onclick = function() { showPage('games'); };
+
+  var navWatch = document.getElementById("navWatch");
+  if(navWatch) navWatch.onclick = function() { showPage('watch'); };
+
+  var navListen = document.getElementById("navListen");
+  if(navListen) navListen.onclick = function() { showPage('listen'); };
+
+  var navBoard = document.getElementById("navBoard");
+  if(navBoard) navBoard.onclick = function() { showPage('leaderboard'); };
+
+  var navInbox = document.getElementById("navInbox");
+  if(navInbox) navInbox.onclick = function() { showPage('inbox'); };
+
+  // Other buttons
+  var saveBtn = document.getElementById("saveBtn");
+  if(saveBtn) saveBtn.onclick = saveDetails;
+
+  var dailyBtn = document.getElementById("dailyBtn");
+  if(dailyBtn) dailyBtn.onclick = claimDailyBonus;
+
+  var withdrawBtn = document.getElementById("withdrawBtn");
+  if(withdrawBtn) withdrawBtn.onclick = withdraw;
+
+  // Reply button
+  var replyBtn = document.getElementById("replyBtn");
+  if(replyBtn) {
+    replyBtn.onclick = function() {
+      var u;
+      try { u = localStorage.getItem("user"); } catch(e) { u = null; }
+      var txt = document.getElementById('playerReply').value.trim();
+      if(!txt || !u || !db) return;
+      var id = ['Admin_Mada', u].sort().join('_');
+      db.ref('chats/' + id + '/messages').push({
+        from: u,
+        to: 'Admin_Mada',
+        text: txt,
+        timestamp: Date.now(),
+        status: 'sent'
+      }).then(function() {
+        document.getElementById('playerReply').value = '';
+        document.getElementById('replyStatus').innerHTML = '<span style="color:#51cf66">✓ Sent</span>';
+        setTimeout(function() { 
+          document.getElementById('replyStatus').innerHTML = ''; 
+        }, 1500);
+      });
+    };
+  }
+
+  // Music file input
+  var musicInput = document.getElementById('musicFileInput');
+  if(musicInput) {
+    musicInput.addEventListener('change', handleMusicUpload);
+  }
+
+  // FIXED: Load user data and attempt auto-login AFTER Firebase is ready
+  setTimeout(function() {
+    try {
+      var u = localStorage.getItem("user");
+      if(u && db) {
+        // Verify user exists in database before auto-login
+        db.ref('users/' + u).once('value', function(snap) {
+          if(snap.exists()) {
+            var data = snap.val() || {};
+            if(data.phone && data.network) {
+              lockPaymentMethod(data.phone, data.network);
+            }
+            if(data.email) {
+              try { localStorage.setItem("userEmail", data.email); } catch(e) {}
+            }
+            document.getElementById("loginPage").classList.remove("active");
+            document.getElementById("mainNav").style.display = "flex";
+            showPage('wallet');
+            setupPresence(u);
+            checkInboxBadge();
+            startRealtimeBalance();
+          } else {
+            // User not in database - clear localStorage
+            localStorage.removeItem('user');
+            localStorage.removeItem('displayName');
+            localStorage.removeItem('userPhone');
+            localStorage.removeItem('network');
+            localStorage.removeItem('number');
+            localStorage.removeItem('userEmail');
+          }
+        }, function(error) {
+          console.error('Auto-login error:', error);
+          // Stay on login page if error
+        });
+      }
+    } catch(e) {
+      console.error('Auto-login exception:', e);
+    }
+  }, 1500); // Wait 1.5s for Firebase to initialize
+});
+</script>
+
+<div style="margin-top:40px;padding:20px;background:#f5f5f5;border-radius:10px;text-align:center;font-size:12px;color:#666">
+  <a href="https://chat.whatsapp.com/CmvdLsifPKS51OyRnrITFz" target="_blank" style="margin:0 10px">💬 Join Group</a> |
+  <a href="#" onclick="alert('About Us: Mada Game Earn - Rewards platform for Malawian users.');return false" style="margin:0 10px">About Us</a> |
+  <a href="#" onclick="alert('Terms: Users must be 18+. One account per person. Fraud = ban.');return false" style="margin:0 10px">Terms</a> |
+  <a href="#" onclick="alert('Privacy: We collect phone number only for rewards. No data sold.');return false" style="margin:0 10px">Privacy</a> |
+  <a href="#" onclick="alert('Contact: WhatsApp +265 0882 96 83 84');return false" style="margin:0 10px">Contact</a>
+  <p style="margin-top:10px">© 2024-2026 Mada Game Earn - Lilongwe, Malawi</p>
+</div>
+
+<script>
+function updateWithdrawCountdown(){
+  var el=document.getElementById('withdrawCountdown');
+  if(!el)return;
+  var now=new Date();
+  var malawiOffset=2*60;
+  var utc=now.getTime()+(now.getTimezoneOffset()*60000);
+  var malawiTime=new Date(utc+(malawiOffset*60000));
+  var day=malawiTime.getDay();
+  var hour=malawiTime.getHours();
+  if(day===5&&hour>=18&&hour<21){
+    var end=new Date(malawiTime);
+    end.setHours(21,0,0,0);
+    var diff=end-malawiTime;
+    var h=Math.floor(diff/3600000);
+    var m=Math.floor((diff%3600000)/60000);
+    var s=Math.floor((diff%60000)/1000);
+    el.innerHTML='<span style="color:#51cf66">🟢 OPEN! Closes in '+h+'h '+m+'m '+s+'s</span>';
+    return;
+  }
+  var next=new Date(malawiTime);
+  var daysUntilFri=(5-day+7)%7;
+  if(daysUntilFri===0)daysUntilFri=7;
+  if(day===5&&hour<18)daysUntilFri=0;
+  next.setDate(malawiTime.getDate()+daysUntilFri);
+  next.setHours(18,0,0,0);
+  var diff=next-malawiTime;
+  var days=Math.floor(diff/86400000);
+  var h=Math.floor((diff%86400000)/3600000);
+  var m=Math.floor((diff%3600000)/60000);
+  var s=Math.floor((diff%60000)/1000);
+  var text='';
+  if(days>0)text+=days+'d ';
+  text+=h+'h '+m+'m '+s+'s';
+  el.innerHTML='⏰ Next: Friday 6PM<br><span style="color:#ffd700">'+text+'</span>';
+}
+setInterval(updateWithdrawCountdown,1000);
+setTimeout(updateWithdrawCountdown,500);
+</script>
+
+</body>
+</html>
