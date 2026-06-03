@@ -1025,4 +1025,4 @@ function startFlappyBirdExtreme(){
 
 function startGame(type) { currentGame = type; document.getElementById('playPage').classList.add('active'); var pages = document.querySelectorAll('.page'); for (var i = 0; i < pages.length; i++) { if (pages[i].id!== 'playPage') pages[i].classList.remove('active'); } setGameAdsVisible(false); document.getElementById('gameTitle').innerText = type.charAt(0).toUpperCase() + type.slice(1); if (type === 'temple') startTempleRun(); else if (type === 'flappy') startFlappyBirdExtreme(); else if (type === 'memory') startMemoryMatch(); else if (type === 'color') startColorMatch(); else if (type === 'math') startMathChallenge(); else if (type === 'checkers') startCheckers(); }
 
-var currentLeaderboardView='daily';const lb_flags={MW:"🇲🇼",ZM:"🇿🇲",TZ:"🇹🇿",KE:"🇰🇪",ZA:"🇿
+var currentLeaderboardView='daily';const lb_flags={MW:"🇲🇼",ZM:"🇿🇲",TZ:"🇹🇿",KE:"🇰🇪",ZA:"🇿🇦",NG:"🇳🇬",US:"🇺🇸",GB:"🇬🇧",IN":"🇮🇳"};const HIDE_USERS=["Admin_Mada","Mada_Banda"];function getToday(){return new Date().toISOString().split('T')[0]}...
