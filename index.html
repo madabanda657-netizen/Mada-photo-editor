@@ -1,570 +1,1120 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Admin Panel - Mada Game</title>
 <meta charset="UTF-8">
-<title>Mada Game Earn - PvP Checkers</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check-compat.js"></script>
-<script src="https://www.google.com/recaptcha/api.js?render=6LeoB_8sAAAAAJS4kepjICEYny7besSCK4mv3l9Q"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://js.median.dev/median.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#000;color:#fff;text-align:center;overflow-x:hidden}.container{padding:20px;max-width:600px;margin:0 auto;padding-bottom:80px}.card{background:#111;padding:20px;margin:15px 0;border-radius:15px;box-shadow:0 0 20px #00ffcc55;border:1px solid #00ffcc33}input,select,button{padding:12px;margin:8px 0;border-radius:10px;border:none;width:100%;font-size:16px}button{background:linear-gradient(45deg,#00ffcc,#00ccff);font-weight:bold;color:#000;cursor:pointer}h1{color:#00ffcc;margin-bottom:10px;font-size:28px}h3{color:#00ccff;margin-bottom:10px}.success{color:#51cf66}.error{color:#ff6b6b}.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:none;justify-content:space-around;padding:10px 0 12px;box-shadow:0 -2px 10px #00ffcc44;z-index:100}.nav-btn{background:transparent;border:1px solid transparent;color:#888;padding:6px 2px;margin:0;width:auto;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:3px}.nav-btn .nav-icon{font-size:18px}.nav-btn.active{color:#00ffcc;border-color:transparent;text-shadow:0 0 10px #00ffcc}.page{display:none}.page.active{display:block}.flex-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#ccc}
-@keyframes coinDrop { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #ffd700; } 100% { transform: scale(1); } }
-.coin-update { animation: coinDrop 0.5s ease; }
-.phone-input-group{display:flex;gap:0;margin:8px 0}.phone-prefix{background:linear-gradient(135deg,#ff0000,#cc0000);color:#fff;padding:12px;border-radius:10px 0 0 10px;font-size:16px;font-weight:bold;white-space:nowrap;display:flex;align-items:center;border:1px solid #ff000055;border-right:none;min-width:60px;justify-content:center}.phone-input-group input{border-radius:0 10px 10px 0!important;margin:0!important}
-.payment-locked-box{background:linear-gradient(135deg,#0a1a1a,#0a1a2e);padding:18px;border-radius:12px;border:2px solid #00ffcc44;margin:10px 0}.payment-locked-row{display:flex;justify-content:space-between;align-items:center}.payment-locked-label{font-size:12px;color:#888}.payment-locked-phone{font-size:22px;font-weight:bold;color:#00ffcc}.payment-locked-flag{font-size:36px}.payment-locked-secure{margin-top:10px;font-size:11px;color:#51cf66;display:flex;align-items:center;justify-content:center;gap:5px}.payment-locked-divider{height:1px;background:#00ffcc33;margin:10px 0}.payment-locked-title{font-size:13px;color:#00ffcc;font-weight:bold;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.referral-card{background:linear-gradient(135deg,#1a1a2e,#0a2a1a);border:2px solid #ffd700}.referral-link-box{display:flex;gap:8px;margin-top:12px}.referral-link-box input{flex:1;background:#0a0a0a;color:#00ffcc;border:1px solid #ffd700;padding:10px;border-radius:8px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy-btn{width:auto!important;padding:10px 16px!important;background:linear-gradient(45deg,#ffd700,#ffaa00)!important;color:#000!important;font-weight:bold;border-radius:8px!important;cursor:pointer;border:none!important;margin:0!important}
-.grade-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}.grade-card{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:20px;border-radius:15px;cursor:pointer;border:2px solid #00ffcc33;transition:transform 0.2s;position:relative}.grade-card:hover{transform:translateY(-3px);border-color:#00ffcc}.grade-icon{font-size:40px;margin-bottom:10px}.grade-entry{color:#ff6b6b;font-weight:bold;font-size:18px}.grade-prize{color:#51cf66;font-weight:bold;font-size:16px;margin-top:5px}.grade-fee{color:#888;font-size:11px;margin-top:8px}
-.pvp-board-container{margin:20px auto;max-width:360px}.pvp-info-bar{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#111;border-radius:10px;margin:10px 0;border:1px solid #00ffcc33}.pvp-player{font-weight:bold;font-size:14px}.pvp-turn{color:#ffd700;font-weight:bold;font-size:12px;animation:pulse 1.5s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.checkers-board{display:grid;grid-template-columns:repeat(8,1fr);border:3px solid #00ffcc;border-radius:5px;overflow:hidden;aspect-ratio:1}.square{aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}.square.dark{background:#1a1a1a}.square.light{background:#e0e0e0}.square.selected{outline:3px solid #ffd700;outline-offset:-3px;z-index:2}.square.valid-move::after{content:'';position:absolute;width:30%;height:30%;background:rgba(0,255,204,0.6);border-radius:50%}.piece{width:70%;height:70%;border-radius:50%;border:2px solid #888;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ffd700;z-index:1}.piece.p1{background:radial-gradient(circle,#ff6b6b,#c92a2a)}.piece.p2{background:radial-gradient(circle,#444,#000)}.piece.king::after{content:'♔'}
-.draw-counter-bar{display:none;padding:8px 12px;background:#1a1a0a;border-radius:8px;margin:8px 0;border:1px solid #ffd70044;text-align:center;font-size:14px;color:#ffd700;font-weight:bold;animation:pulse 1.5s infinite}
-.searching-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column}.search-spinner{width:60px;height:60px;border:6px solid #333;border-top:6px solid #00ffcc;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.chat-user-row{transition:background 0.2s;cursor:pointer}.chat-user-row:hover{background:#1a1a1a!important}.chat-avatar{position:relative;width:44px;height:44px;background:linear-gradient(135deg,#1a1a2e,#0a2a2a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#00ffcc;flex-shrink:0;font-weight:bold}.chat-online-dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#555;border:2px solid #111;transition:background 0.3s}.chat-online-dot.on{background:#51cf66;box-shadow:0 0 6px #51cf66}.chat-unread-badge{display:none;min-width:20px;height:20px;border-radius:10px;background:#ff6b6b;color:#fff;font-size:10px;font-weight:bold;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0}
-.chat-msg-container{display:flex;margin:6px 0;align-items:flex-end;gap:4px;width:100%;padding:0 2px}
-.chat-msg-mine{background:linear-gradient(135deg,#064e3b,#065f46)!important;border:1px solid rgba(0,255,204,0.3)!important;border-bottom-right-radius:4px!important;border-radius:14px!important;box-shadow:0 1px 6px rgba(0,255,204,0.1)!important}
-.chat-msg-other{background:linear-gradient(135deg,#1e293b,#1e1b4b)!important;border:1px solid rgba(100,140,255,0.2)!important;border-bottom-left-radius:4px!important;border-radius:14px!important;box-shadow:0 1px 6px rgba(100,100,200,0.08)!important}
-.chat-msg-bubble{padding:10px 14px;border-radius:14px;max-width:75%;word-wrap:break-word;min-width:60px}
-.chat-reply-btn,.chat-delete-btn{font-size:12px;padding:4px 6px;background:transparent;border:none;cursor:pointer;border-radius:50%;opacity:0.35;flex-shrink:0;line-height:1;transition:opacity 0.2s}.chat-reply-btn:hover,.chat-delete-btn:hover{opacity:1}.chat-reply-btn{color:#555}.chat-delete-btn{color:#ff6b6b}
-.chat-date-sep{text-align:center;margin:14px 0;font-size:11px;color:#555}.chat-date-sep span{background:#1a1a1a;padding:3px 14px;border-radius:10px;display:inline-block}
-.chat-reply-preview-box{display:none;padding:8px 12px;background:#1a1a2e;border-radius:8px 8px 0 0;border-left:3px solid #00ffcc;margin-top:5px}.chat-input-bar{display:flex;gap:8px;margin-top:5px;align-items:flex-end}.chat-attach-btn,.chat-voice-btn,.chat-clear-btn{cursor:pointer;padding:12px;background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;width:auto;margin:0;font-size:20px;border:1px solid #00ffcc33}.chat-attach-btn input{display:none}
-.chat-msg-img{max-width:220px;max-height:220px;border-radius:10px;margin-bottom:6px;display:block;cursor:pointer;border:2px solid rgba(0,255,204,0.25);box-shadow:0 2px 8px rgba(0,0,0,0.4)}
-.chat-voice-player{width:180px;height:35px;margin-top:5px}.chat-tick-read{color:#00ffcc;font-size:11px}.chat-tick-unread{color:#666;font-size:11px}
-.chat-header-bar{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1a1a1a;flex-shrink:0}.chat-conv-avatar{width:38px;height:38px;background:linear-gradient(135deg,#1a1a2e,#0a2a2a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#00ffcc;font-weight:bold;flex-shrink:0}
-.chat-search-input{background:#1a1a1a!important;color:#fff!important;border:1px solid #00ffcc33!important;margin-bottom:10px!important}.chat-user-list{max-height:calc(100vh - 220px);overflow-y:auto;padding:0!important}
-.recording-indicator{color:#ff6b6b;font-size:12px;animation:blink 1s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.history-list{margin-top:10px;text-align:left;border-top:1px solid #1a1a1a;padding-top:10px}.history-item{padding:8px 0;border-bottom:1px solid #1a1a1a;font-size:12px;display:flex;justify-content:space-between;align-items:center}.history-status-pending{color:#ffd700;font-weight:bold;font-size:11px}.history-status-approved{color:#51cf66;font-weight:bold;font-size:11px}.history-status-declined{color:#ff6b6b;font-weight:bold;font-size:11px}
-.legal-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;align-items:center;justify-content:center;padding:20px}.legal-modal-content{background:#111;border:1px solid #00ffcc44;border-radius:15px;padding:20px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;text-align:left;color:#ccc;font-size:13px;line-height:1.6}.legal-modal-content h2{color:#00ffcc;margin-bottom:15px;text-align:center}
-.wa-float{position:fixed;bottom:80px;right:15px;width:55px;height:55px;background:#25d366;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,211,102,.4);z-index:99;text-decoration:none}.wa-float:hover{transform:scale(1.1)}.wa-float svg{width:28px;height:28px;fill:#fff}
-.inbox-item { padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
-.inbox-meta { font-size: 10px; color: #888; display: flex; justify-content: space-between; }
-.inbox-file { background: #1a1a2e; padding: 6px 12px; border-radius: 8px; color: #00ccff; font-size: 13px; text-decoration: none; display: inline-block; margin-top: 5px; border: 1px solid #00ccff33; }
-.inbox-img { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 5px; cursor: pointer; }
-.notification-dot { width: 8px; height: 8px; background: #ff6b6b; border-radius: 50%; display: inline-block; vertical-align: middle; margin-left: 4px; }
-.profile-pic-container { position: relative; width: 120px; height: 120px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 3px solid #00ffcc; box-shadow: 0 0 15px #00ffcc55; margin: 0 auto; background: #1a1a2e; }
-.profile-pic { width: 100%; height: 100%; object-fit: cover; }
-.profile-pic-upload-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-size: 14px; padding: 8px 0; transition: opacity 0.3s; opacity: 0; }
-.profile-pic-container:hover .profile-pic-upload-overlay { opacity: 1; }
-#splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100000; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.6s ease-out; }
-#splashScreen.splash-hide { opacity: 0; pointer-events: none; }
-#splashScreen img { max-width: 200px; border-radius: 25px; box-shadow: 0 0 40px rgba(0,255,204,0.3); animation: splashPulse 2s infinite alternate; }
-#splashScreen p { margin-top: 20px; font-size: 14px; color: #00ffcc; letter-spacing: 2px; font-weight: bold; animation: blink 1.5s infinite; }
-@keyframes splashPulse { 0% { transform: scale(1); box-shadow: 0 0 30px rgba(0,255,204,0.2); } 100% { transform: scale(1.03); box-shadow: 0 0 50px rgba(0,255,204,0.5); } }
-.deposit-rules { text-align: left; background: #1a1a0a; border: 1px dashed #ffd700; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-.deposit-step { margin-bottom: 10px; padding-left: 25px; position: relative; font-size: 13px; color: #ddd; line-height: 1.4; }
-.deposit-step::before { content: attr(data-num); position: absolute; left: 0; top: 0; background: #ffd700; color: #000; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-.deposit-warning { color: #ff6b6b; font-weight: bold; font-size: 12px; margin-top: 10px; display: block; }
-.auth-links { margin-top: 15px; font-size: 13px; color: #888; }
-.auth-links a { color: #00ffcc; text-decoration: underline; cursor: pointer; }
-.auth-links a:hover { color: #fff; }
-.input-wrapper { position: relative; width: 100%; }
-.toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; color: #888; user-select: none; z-index: 2; }
-.toggle-password:hover { color: #00ffcc; }
-.forgot-section { display: none; margin-top: 15px; padding: 15px; background: #1a1a0a; border-radius: 10px; border: 1px solid #ff922b44; text-align: left; }
-.forgot-section h4 { color: #ff922b; margin-bottom: 10px; font-size: 14px; text-align: center; }
-.forgot-section input { background: #0a0a0a; color: #fff; border: 1px solid #ff922b33; }
-.forgot-section .forgot-back { color: #888; font-size: 12px; cursor: pointer; text-align: center; margin-top: 10px; }
-.forgot-section .forgot-back:hover { color: #fff; }
-.new-password-box { display: none; margin-top: 12px; padding: 12px; background: #0a2a0a; border: 1px solid #51cf66; border-radius: 8px; text-align: center; }
-.new-password-box .new-pass-value { font-size: 24px; font-weight: bold; color: #51cf66; letter-spacing: 2px; margin: 8px 0; word-break: break-all; }
-.appcheck-badge { position: fixed; top: 8px; right: 8px; font-size: 10px; padding: 3px 8px; border-radius: 6px; z-index: 99999; font-weight: bold; display: none; }
-.appcheck-badge.ok { background: #0a3a0a; color: #51cf66; border: 1px solid #51cf6644; display: block; }
-.appcheck-badge.fail { background: #3a0a0a; color: #ff6b6b; border: 1px solid #ff6b6b44; display: block; }
-#chatConvPage.active { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; display: flex !important; flex-direction: column; background: #000; z-index: 50; padding: 10px; max-width: 100%; margin: 0; overflow: hidden; }
-.chat-messages-box { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 8px; background: #050508; border-radius: 12px; border: 1px solid #1a1a1a; width: 100%; -webkit-overflow-scrolling: touch; }
-.chat-back-btn{width:auto;padding:8px 14px;background:#1a1a1a;color:#00ffcc;border:1px solid #00ffcc44;border-radius:10px;cursor:pointer;font-size:14px;flex-shrink:0;margin:0}
-#imageViewerModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.97); z-index: 10002; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
-#imageViewerModal .iv-top-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent); z-index: 3; }
-#imageViewerModal .iv-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
-#imageViewerModal img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px; user-select: none; -webkit-user-select: none; }
-.airtel-banner { background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); padding: 12px; border-radius: 10px 10px 0 0; margin-top: 8px; display: flex; align-items: center; gap: 8px; color: #fff; font-weight: bold; }
-.airtel-banner span:first-child { font-size: 24px; }
-.inbox-actions-row { display: flex; gap: 6px; margin-top: 4px; justify-content: flex-end; }
-.inbox-action-btn { font-size: 11px !important; padding: 4px 10px !important; border-radius: 6px !important; border: none !important; cursor: pointer !important; font-weight: bold !important; width: auto !important; margin: 0 !important; display: inline-flex !important; align-items: center !important; gap: 3px !important; transition: opacity 0.2s, transform 0.15s !important; }
-.inbox-action-btn:active { transform: scale(0.95); }
-.inbox-delete-btn { background: linear-gradient(135deg, #ff6b6b, #c92a2a) !important; color: #fff !important; }
-.inbox-delete-btn:hover { opacity: 0.85; }
-.inbox-save-btn { background: linear-gradient(135deg, #51cf66, #2b8a3e) !important; color: #fff !important; }
-.inbox-save-btn:hover { opacity: 0.85; }
-.inbox-item.deleting { opacity: 0.4; pointer-events: none; transition: opacity 0.3s; }
-.profile-action-item{display:flex;justify-content:space-between;align-items:center;padding:14px 12px;border-bottom:1px solid #1a1a1a;cursor:pointer;transition:background 0.2s;border-radius:8px}
-.profile-action-item:hover{background:#1a1a2e}
-.profile-action-item:active{background:#0a2a2a}
-.profile-action-item:last-child{border-bottom:none}
-.profile-action-arrow{color:#555;font-size:18px;transition:transform 0.2s}
-.profile-action-item:hover .profile-action-arrow{color:#00ffcc;transform:translateX(3px)}
-.toggle-switch{position:relative;display:inline-block;width:50px;height:26px;flex-shrink:0}
-.toggle-switch input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;border-radius:26px;transition:0.3s}
-.toggle-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s}
-.toggle-switch input:checked+.toggle-slider{background:#00ffcc}
-.toggle-switch input:checked+.toggle-slider:before{transform:translateX(24px)}
-.profile-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:10001;align-items:center;justify-content:center;padding:20px}
-.profile-modal-content{background:#111;border:1px solid #00ffcc44;border-radius:15px;padding:25px;max-width:400px;width:100%;text-align:center}
-.recent-match-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;font-size:13px}
-.recent-match-item:last-child{border-bottom:none}
-.match-result-win{color:#51cf66;font-weight:bold;font-size:12px}
-.match-result-loss{color:#ff6b6b;font-weight:bold;font-size:12px}
-.match-result-draw{color:#ffd700;font-weight:bold;font-size:12px}
-.verification-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:bold}
-.verification-badge.verified{background:#0a3a0a;color:#51cf66;border:1px solid #51cf6644}
-.verification-badge.unverified{background:#3a0a0a;color:#ff6b6b;border:1px solid #ff6b6b44}
-.stat-highlight{font-size:22px;font-weight:bold;margin:5px 0}
-.stat-label{font-size:11px;color:#888;margin-bottom:8px}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0}
-.stat-box{background:#0a0a0a;padding:12px 8px;border-radius:12px;text-align:center;border:1px solid #1a1a1a}
-.rank-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-weight:bold;font-size:14px}
-.rank-gold{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#000}
-.rank-silver{background:linear-gradient(135deg,#c0c0c0,#888);color:#000}
-.rank-bronze{background:linear-gradient(135deg,#cd7f32,#a0522d);color:#fff}
-.rank-default{background:#1a1a2e;color:#00ffcc;border:1px solid #00ffcc33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#060809;color:#e0e0e0}
+.container{padding:20px;max-width:1400px;margin:0 auto}
+.header{background:linear-gradient(135deg,#0d1117,#161b22);padding:18px 24px;border-radius:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;border:1px solid #1e2a3a}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo span{background:linear-gradient(135deg,#00ffcc,#00ccff);color:#000;padding:6px 12px;border-radius:6px;font-weight:900;font-size:14px;letter-spacing:1px}
+.header-logo strong{font-size:18px;color:#fff}
+.card{background:linear-gradient(135deg,#0d1117,#111820);padding:24px;margin:15px 0;border-radius:12px;border:1px solid #1a2332}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #1a2332;font-size:13px}
+th{color:#00ffcc;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+tr:hover{background:#0d1520}
+.btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:11px;margin:2px;font-weight:700;transition:all .15s;letter-spacing:.3px}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn:active{transform:scale(.96)}
+.btn-approve{background:linear-gradient(135deg,#51cf66,#2b8a3e);color:#fff}
+.btn-reject{background:linear-gradient(135deg,#ff6b6b,#c92a2a);color:#fff}
+.btn-ban{background:linear-gradient(135deg,#ff922b,#e67700);color:#fff}
+.btn-unban{background:linear-gradient(135deg,#00ccff,#0099cc);color:#fff}
+.btn-edit{background:linear-gradient(135deg,#9b59b6,#7c3aed);color:#fff}
+.btn-p1{background:linear-gradient(135deg,#ff6b6b,#c92a2a);color:#fff}
+.btn-p2{background:linear-gradient(135deg,#444,#333);color:#fff;border:1px solid #666}
+.btn-refund{background:linear-gradient(135deg,#ffd700,#f59f00);color:#000}
+.btn-view{background:linear-gradient(135deg,#9b59b6,#7c3aed);color:#fff}
+.btn-detail{background:linear-gradient(135deg,#00ffcc,#00ccff);color:#000}
+.btn-reset-pw{background:linear-gradient(135deg,#ff922b,#e67700);color:#fff}
+.status{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block;letter-spacing:.5px}
+.status-pending{background:#ffd70022;color:#ffd700;border:1px solid #ffd70044}
+.status-approved,.status-paid,.status-finished{background:#51cf6622;color:#51cf66;border:1px solid #51cf6644}
+.status-rejected,.status-declined{background:#ff6b6b22;color:#ff6b6b;border:1px solid #ff6b6b44}
+.status-playing{background:#00ccff22;color:#00ccff;border:1px solid #00ccff44}
+.status-draw{background:#88888822;color:#aaa;border:1px solid #88888844}
+.login-box{max-width:420px;margin:100px auto;background:linear-gradient(135deg,#0d1117,#111820);padding:40px;border-radius:16px;border:1px solid #1a2332;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.login-box h2{text-align:center;margin-bottom:8px}
+.login-box p{text-align:center;color:#555;font-size:12px;margin-bottom:24px}
+input,select{width:100%;padding:12px 14px;margin:8px 0;border-radius:8px;border:1px solid #1a2332;background:#0a0e14;color:#fff;font-size:14px;transition:border-color .2s}
+input:focus,select:focus{outline:none;border-color:#00ffcc}
+.hidden{display:none}
+.tabs{display:flex;background:#0d1117;border-radius:10px;margin-bottom:20px;border:1px solid #1a2332;overflow:hidden;flex-wrap:wrap}
+.tab{flex:1;padding:14px;text-align:center;cursor:pointer;color:#555;font-weight:700;background:#0d1117;border:none;font-size:12px;min-width:110px;transition:all .2s;letter-spacing:.3px}
+.tab:hover{color:#aaa;background:#111820}
+.tab.active{color:#000;background:linear-gradient(135deg,#00ffcc,#00ccff)}
+.user-layout{display:flex;gap:16px;min-height:520px}
+.user-list{width:320px;background:#0a0e14;border-radius:10px;overflow-y:auto;border:1px solid #1a2332;flex-shrink:0}
+.user-list-header{padding:12px 15px;border-bottom:1px solid #1a2332;font-size:11px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;position:sticky;top:0;background:#0a0e14;z-index:2}
+.user-item{padding:12px 15px;border-bottom:1px solid #111820;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.user-item:hover{background:#111820}
+.user-item.active{background:#0d1a2a;border-left:3px solid #00ffcc}
+.user-item .u-name{font-weight:700;color:#e0e0e0;font-size:13px}
+.user-item .u-sub{color:#555;font-size:11px;margin-top:2px}
+.user-item .u-coins{color:#ffd700;font-size:12px;font-weight:700}
+.user-item .u-actions{display:flex;gap:3px;flex-shrink:0}
+.chat-area{flex:1;background:#0a0e14;border-radius:10px;display:flex;flex-direction:column;border:1px solid #1a2332;min-width:0}
+.chat-header{padding:14px 18px;border-bottom:1px solid #1a2332;font-weight:700;color:#00ffcc;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.chat-messages{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:#060809;border-radius:0 0 10px 10px;min-height:0}
+.msg-bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:14px;word-wrap:break-word;line-height:1.5}
+.msg-admin{background:linear-gradient(135deg,#003d33,#004d40);align-self:flex-end;border:1px solid #00ffcc33;border-bottom-right-radius:4px}
+.msg-user{background:linear-gradient(135deg,#1a1a2e,#1e1b4b);align-self:flex-start;border:1px solid #2a2a4a;border-bottom-left-radius:4px}
+.chat-input-area{padding:14px;border-top:1px solid #1a2332;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.chat-input-area input[type="text"]{flex:1;margin:0}
+.chat-input-area button{background:linear-gradient(135deg,#00ffcc,#00ccff);color:#000;border:none;padding:12px 24px;border-radius:8px;font-weight:700;cursor:pointer;width:auto;transition:all .15s}
+.chat-input-area button:hover{filter:brightness(1.1)}
+.chat-input-area button:disabled{opacity:.3;cursor:not-allowed;filter:none}
+.chat-attach-btn{background:#111820!important;color:#00ffcc;padding:12px;border-radius:8px;cursor:pointer;font-size:18px;border:1px solid #1a2332;width:auto;margin:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.chat-attach-btn:hover{border-color:#00ffcc}
+.chat-attach-btn input{display:none}
+.empty-state{color:#333;text-align:center;margin-top:60px;font-size:14px}
+.btn-small{border:none;padding:5px 8px;border-radius:5px;cursor:pointer;font-size:11px;margin:0;font-weight:700;transition:all .15s}
+.btn-small:hover{filter:brightness(1.15)}
+.online-dot{width:8px;height:8px;background:#51cf66;border-radius:50%;display:inline-block;margin-right:6px;box-shadow:0 0 6px #51cf66}
+.offline-dot{width:8px;height:8px;background:#333;border-radius:50%;display:inline-block;margin-right:6px}
+.banned-text{color:#ff6b6b;text-decoration:line-through}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.modal-content{background:linear-gradient(135deg,#0d1117,#111820);padding:28px;border-radius:16px;border:1px solid #1a2332;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;text-align:left}
+.modal-content h3{color:#00ffcc;margin-bottom:20px;text-align:center;font-size:18px}
+.modal-board{display:grid;grid-template-columns:repeat(8,1fr);border:3px solid #00ffcc;border-radius:5px;overflow:hidden;aspect-ratio:1;max-width:360px;margin:15px auto}
+.modal-sq{aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.modal-sq.dark{background:#1a1a1a}
+.modal-sq.light{background:#e0e0e0}
+.modal-piece{width:70%;height:70%;border-radius:50%;border:2px solid #888;display:flex;align-items:center;justify-content:center;font-size:16px;color:#ffd700}
+.modal-piece.p1{background:radial-gradient(circle,#ff6b6b,#c92a2a)}
+.modal-piece.p2{background:radial-gradient(circle,#444,#000)}
+.modal-piece.king::after{content:'♔'}
+.admin-voice-btn{background:#111820;color:#00ffcc;padding:12px;border-radius:8px;cursor:pointer;font-size:18px;border:1px solid #1a2332;width:auto;margin:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.admin-voice-btn.recording{background:#ff6b6b;color:#fff;border-color:#ff6b6b;animation:recPulse 1s infinite}
+.admin-recording-bar{display:none;padding:8px 15px;background:#1a0505;border-top:1px solid #ff6b6b33;font-size:12px;color:#ff6b6b;align-items:center;gap:8px}
+.admin-recording-bar.active{display:flex}
+.rec-dot{width:8px;height:8px;background:#ff6b6b;border-radius:50%;animation:recBlink 1s infinite}
+@keyframes recBlink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 #ff6b6b66}70%{box-shadow:0 0 0 8px #ff6b6b00}100%{box-shadow:0 0 0 0 #ff6b6b00}}
+.msg-actions-row{display:flex;gap:4px;margin-top:6px;justify-content:flex-end;flex-wrap:wrap}
+.msg-action-btn{font-size:10px!important;padding:3px 8px!important;border-radius:5px!important;border:none!important;cursor:pointer!important;font-weight:700!important;width:auto!important;margin:0!important;display:inline-flex!important;align-items:center!important;gap:2px!important;transition:all .15s!important}
+.msg-action-btn:active{transform:scale(.95)}
+.msg-delete-btn{background:linear-gradient(135deg,#ff6b6b,#c92a2a)!important;color:#fff!important}
+.msg-save-btn{background:linear-gradient(135deg,#51cf66,#2b8a3e)!important;color:#fff!important}
+.msg-bubble.deleting{opacity:.3;pointer-events:none;transition:opacity .3s}
+.chat-mode-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid #1a2332}
+.chat-mode-btn{padding:8px 14px;cursor:pointer;font-size:11px;font-weight:700;border:none;background:#111820;color:#555;transition:all .2s}
+.chat-mode-btn.active-mode{background:#00ffcc;color:#000}
+.chat-mode-btn:hover:not(.active-mode){background:#1a2332;color:#ccc}
+.inbox-badge{background:#ff6b6b;color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:4px;font-weight:700}
+.msg-source-tag{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;display:inline-block;margin-bottom:4px}
+.msg-source-inbox{background:#ff922b22;color:#ff922b;border:1px solid #ff922b44}
+.msg-source-chat{background:#00ffcc22;color:#00ffcc;border:1px solid #00ffcc44}
+
+/* ===== USER EDIT MODAL ===== */
+.edit-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.edit-modal-grid .full-width{grid-column:1/-1}
+.edit-field-label{font-size:11px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.edit-field-value{font-size:14px;color:#e0e0e0;margin-bottom:8px;padding:8px 12px;background:#0a0e14;border-radius:6px;border:1px solid #1a2332}
+.edit-field-input{width:100%;padding:10px 12px;margin:0;border-radius:6px;border:1px solid #1a2332;background:#0a0e14;color:#fff;font-size:14px;transition:border-color .2s}
+.edit-field-input:focus{outline:none;border-color:#00ffcc}
+.edit-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.edit-stat-box{background:#0a0e14;padding:12px;border-radius:8px;text-align:center;border:1px solid #1a2332}
+.edit-stat-value{font-size:20px;font-weight:900;color:#00ffcc}
+.edit-stat-label{font-size:10px;color:#555;margin-top:2px;text-transform:uppercase}
+.edit-modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap}
+.edit-modal-actions .btn{padding:10px 22px;font-size:13px}
+.edit-toast{position:fixed;bottom:30px;right:30px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:700;z-index:99999;transform:translateY(100px);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);max-width:360px}
+.edit-toast.show{transform:translateY(0);opacity:1}
+.edit-toast.success{background:linear-gradient(135deg,#0a2a0a,#0d3d0d);color:#51cf66;border:1px solid #51cf6644}
+.edit-toast.error{background:linear-gradient(135deg,#2a0a0a,#3d0d0d);color:#ff6b6b;border:1px solid #ff6b6b44}
+.edit-profile-pic{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #00ffcc;margin:0 auto 15px;display:block;cursor:pointer;transition:transform .2s}
+.edit-profile-pic:hover{transform:scale(1.05)}
+.edit-section-title{font-size:12px;color:#00ffcc;font-weight:700;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid #1a2332;display:flex;align-items:center;gap:6px}
+.edit-section-title:first-of-type{margin-top:0}
+.edit-verified{color:#51cf66;font-weight:700;font-size:12px}
+.edit-unverified{color:#ff6b6b;font-weight:700;font-size:12px}
+
+.stat-card{background:linear-gradient(135deg,#0d1117,#111820);padding:16px 20px;border-radius:10px;text-align:center;border:1px solid #1a2332;flex:1;min-width:100px}
+.stat-card .stat-num{font-size:26px;font-weight:900}
+.stat-card .stat-lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+
+@media(max-width:768px){
+  .user-layout{flex-direction:column}
+  .user-list{width:100%;max-height:250px}
+  th,td{padding:8px;font-size:10px}
+  .tab{padding:10px;font-size:10px;min-width:80px}
+  .edit-modal-grid{grid-template-columns:1fr}
+  .edit-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-row{gap:8px}
+  .stat-card{min-width:80px;padding:12px}
+  .stat-card .stat-num{font-size:20px}
+}
 </style>
 </head>
 <body>
 
-<div id="appInstallGate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.97); z-index:999999; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;">
-  <div style="font-size:60px; margin-bottom:20px;">🚀</div>
-  <img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:100px; height:auto; border-radius:20px; margin-bottom:20px; box-shadow:0 0 30px #00ffcc55;">
-  <h2 style="color:#00ffcc; font-size:24px; margin-bottom:15px;">Mada Game Earn</h2>
-  <p style="color:#ccc; font-size:15px; margin-bottom:30px; line-height:1.5;">For the best experience and to play PvP Checkers, please download our app.</p>
-  <a id="appDownloadLink" href="https://github.com/madabanda657-netizen/Mada-checker-earn/releases/download/v1.0/app-release.2.apk" target="_blank" style="background:linear-gradient(45deg,#00ffcc,#00ccff); color:#000; font-weight:bold; padding:15px 40px; border-radius:12px; text-decoration:none; font-size:18px; display:inline-block; margin-bottom:15px; box-shadow:0 4px 15px #00ffcc44;">📲 Download App</a>
-  <p style="color:#555; font-size:12px; margin-top:20px;">Open this in the Mada Earn App to continue.</p>
+<div id="loginScreen" class="login-box">
+  <h2 style="color:#00ffcc;font-size:24px;">Mada Admin</h2>
+  <p>Secure admin access for Mada Game Earn</p>
+  <input type="email" id="emailInput" placeholder="Admin Email" value="admin@mada.com">
+  <input type="password" id="passwordInput" placeholder="Password" onkeypress="if(event.key==='Enter')login()">
+  <button onclick="login()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00ffcc,#00ccff);border:none;border-radius:8px;color:#000;font-weight:900;cursor:pointer;font-size:15px;letter-spacing:.5px;transition:all .15s;margin-top:8px">Login</button>
+  <p id="loginError" style="color:#ff6b6b;margin-top:12px;text-align:center;font-size:13px;"></p>
 </div>
 
-<div id="appcheckBadge" class="appcheck-badge">🔒 App Check</div>
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="edit-toast"></div>
 
-<div id="splashScreen">
-  <img src="https://z-cdn-media.chatglm.cn/files/d54d922b-4b7b-4617-ba44-dd7d7ed90ece.jpg?auth_key=1880396714-870c17548bf243a4aaf338c89067f40e-0-f5c6aad1af4806c39becbafe397514a4" alt="Mada Earn">
-  <p>MADA EARN</p>
-</div>
+<div id="adminPanel" class="hidden">
+  <div class="container">
+    <div class="header">
+      <div class="header-logo"><span>AG</span><strong>ADMIN PANEL</strong></div>
+      <button onclick="logout()" style="background:linear-gradient(135deg,#ff6b6b,#c92a2a);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:all .15s">Logout</button>
+    </div>
 
-<div id="termsModal" class="legal-modal"><div class="legal-modal-content"><h2>📜 Terms of Service</h2><p><b>1. Eligibility:</b> You must be at least 18 years old.</p><p><b>2. Real Money Gaming:</b> Play at your own risk.</p><p><b>3. Deposits:</b> Use registered username as reference.</p><p><b>4. Withdrawals:</b> Processed within 3 hours.</p><p><b>5. Fair Play:</b> Cheating = permanent ban.</p><p><b>6. Platform Fee:</b> 20% fee on winnings.</p><p><b>7. Referrals:</b> MWK 10 per 5 referrals.</p><br><button onclick="document.getElementById('termsModal').style.display='none'" style="width:auto;padding:10px 30px;margin:0 auto;display:block">Close</button></div></div>
-<div id="privacyModal" class="legal-modal"><div class="legal-modal-content"><h2>🔒 Privacy Policy</h2><p><b>1. Data Collection:</b> Username, phone, email.</p><p><b>2. Data Usage:</b> Operate app & process transactions.</p><p><b>3. Security:</b> Firebase encrypted.</p><p><b>4. Chat:</b> Voice stored in DB.</p><br><button onclick="document.getElementById('privacyModal').style.display='none'" style="width:auto;padding:10px 30px;margin:0 auto;display:block">Close</button></div></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" style="color:#00ffcc" id="totalUsers">0</div><div class="stat-lbl">Users</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#51cf66" id="onlineUsers">0</div><div class="stat-lbl">Online</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#ffd700" id="pendingDeposits">0</div><div class="stat-lbl">Pending Dep.</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#ffd700" id="pendingCount">0</div><div class="stat-lbl">Pending Bundles</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#00ccff" id="activeMatches">0</div><div class="stat-lbl">Live Matches</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#9b59b6" id="bannedCount">0</div><div class="stat-lbl">Banned</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#ff6b6b" id="vpnCaught">0</div><div class="stat-lbl">VPN Caught</div></div>
+    </div>
 
-<div id="editNameModal" class="profile-modal"><div class="profile-modal-content"><div style="font-size:40px;margin-bottom:10px;">✏️</div><h3 style="color:#00ffcc;margin-bottom:15px;">Edit Display Name</h3><input type="text" id="editNameInput" placeholder="New display name" maxlength="20" style="background:#0a0a0a;color:#fff;border:1px solid #00ffcc33;margin-bottom:15px;"><div style="display:flex;gap:10px;justify-content:center;"><button onclick="saveDisplayName()" style="width:auto;padding:10px 25px;">💾 Save</button><button onclick="closeEditNameModal()" style="width:auto;padding:10px 25px;background:#333;color:#fff;">Cancel</button></div><p id="editNameMsg" style="margin-top:10px;font-size:13px;"></p></div></div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('deposits',this)">Deposits</button>
+      <button class="tab" onclick="switchTab('withdrawals',this)">Bundle Requests</button>
+      <button class="tab" onclick="switchTab('pvp',this)">PvP Matches</button>
+      <button class="tab" onclick="switchTab('chat',this)">Users & Chat</button>
+      <button class="tab" onclick="switchTab('vpn',this)">VPN Logs</button>
+    </div>
 
-<div id="changePasswordModal" class="profile-modal"><div class="profile-modal-content"><div style="font-size:40px;margin-bottom:10px;">🔑</div><h3 style="color:#00ffcc;margin-bottom:15px;">Change Password</h3><div class="input-wrapper" style="margin-bottom:8px;"><input type="password" id="oldPasswordInput" placeholder="Current Password"><span class="toggle-password" onclick="togglePassword('oldPasswordInput', this)">👁️</span></div><div class="input-wrapper" style="margin-bottom:8px;"><input type="password" id="newPasswordInput" placeholder="New Password (min 6 chars)"><span class="toggle-password" onclick="togglePassword('newPasswordInput', this)">👁️</span></div><div class="input-wrapper" style="margin-bottom:15px;"><input type="password" id="confirmPasswordInput" placeholder="Confirm New Password"><span class="toggle-password" onclick="togglePassword('confirmPasswordInput', this)">👁️</span></div><div style="display:flex;gap:10px;justify-content:center;"><button onclick="changePassword()" style="width:auto;padding:10px 25px;">🔑 Change</button><button onclick="closeChangePasswordModal()" style="width:auto;padding:10px 25px;background:#333;color:#fff;">Cancel</button></div><p id="changePasswordMsg" style="margin-top:10px;font-size:13px;"></p></div></div>
+    <div id="depositsTab" class="card">
+      <h3 style="margin-bottom:15px;color:#e0e0e0">Deposit Requests</h3>
+      <div style="overflow-x:auto"><table><thead><tr><th>User</th><th>Points</th><th>Tx ID</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="depositBody"></tbody></table></div>
+    </div>
 
-<div id="deleteAccountModal" class="profile-modal"><div class="profile-modal-content" style="border-color:#ff6b6b44;"><div style="font-size:50px;margin-bottom:10px;">⚠️</div><h3 style="color:#ff6b6b;margin-bottom:15px;">Delete Account</h3><p style="color:#ccc;font-size:13px;margin-bottom:15px;line-height:1.5;">This action <b style="color:#ff6b6b">cannot be undone</b>. All your data, balance, and history will be permanently deleted.</p><p style="color:#888;font-size:12px;margin-bottom:10px;">Type <b style="color:#ff6b6b">DELETE</b> to confirm:</p><input type="text" id="deleteConfirmInput" placeholder='Type "DELETE" to confirm' style="background:#0a0a0a;color:#ff6b6b;border:1px solid #ff6b6b44;margin-bottom:15px;text-align:center;"><div style="display:flex;gap:10px;justify-content:center;"><button onclick="confirmDeleteAccount()" style="width:auto;padding:10px 25px;background:linear-gradient(45deg,#ff6b6b,#c92a2a);color:#fff;">🗑️ Delete Forever</button><button onclick="closeDeleteAccountModal()" style="width:auto;padding:10px 25px;background:#333;color:#fff;">Cancel</button></div><p id="deleteAccountMsg" style="margin-top:10px;font-size:13px;"></p></div></div>
+    <div id="withdrawalsTab" class="card hidden">
+      <h3 style="margin-bottom:15px;color:#e0e0e0">Bundle Requests Queue</h3>
+      <div style="overflow-x:auto"><table><thead><tr><th>User</th><th>Points</th><th>Phone</th><th>Network</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="withdrawalBody"></tbody></table></div>
+    </div>
 
-<div id="searchingOverlay" class="searching-overlay"><div class="search-spinner"></div><h2 style="color:#00ffcc">Finding Opponent...</h2><p id="searchGradeText" style="color:#ccc;margin-top:10px"></p><button onclick="cancelMatchmaking()" style="margin-top:30px;width:auto;padding:12px 30px;background:#ff6b6b;color:#fff">Cancel</button></div>
-<a href="https://chat.whatsapp.com/CmvdLsifPKS51OyRnrITFz" target="_blank" id="waFloatBtn" class="wa-float" title="Join WhatsApp Group"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+    <div id="pvpTab" class="card hidden">
+      <h3 style="margin-bottom:6px;color:#e0e0e0">PvP Match History & Control</h3>
+      <p style="font-size:12px;color:#555;margin-bottom:15px">View live boards, force winners, or refund stuck matches.</p>
+      <div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>P1 (Red)</th><th>P2 (Black)</th><th>Stake</th><th>Status</th><th>Winner</th><th>Actions</th></tr></thead><tbody id="pvpBody"></tbody></table></div>
+    </div>
 
-<div id="imageViewerModal"><div class="iv-top-bar"><span id="ivTitle" style="color:#fff;font-weight:bold;font-size:14px">📷 Photo</span><div style="display:flex;gap:8px"><button onclick="saveImageFromViewer()" style="width:auto;padding:8px 16px;background:#51cf66;color:#000;font-weight:bold;border-radius:8px;font-size:13px">💾 Save</button><button onclick="closeImageViewer()" style="width:auto;padding:8px 16px;background:#ff6b6b;color:#fff;border-radius:8px;font-size:13px">✕ Close</button></div></div><div class="iv-img-wrap"><img id="imageViewerImg" src="" alt="Photo"></div></div>
-
-<div class="container">
-<div id="loginPage" class="page active">
-    <img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:120px;height:auto;border-radius:15px;margin-bottom:10px;box-shadow:0 0 20px #00ffcc55">
-    <h1>Mada Game Earn</h1>
-    <div class="card" id="registerCard">
-        <h3>👤 Create Account</h3>
-        <input type="text" id="usernameInput" placeholder="Username (min 3 chars)" maxlength="20">
-        <select id="networkRegInput" onchange="checkAirtelRecommend()">
-            <option value="">📱 Select Network (Airtel Recommended)</option>
-            <option value="Airtel Money" style="color:#ff0000; font-weight:bold;">🟴 Airtel Money (Recommended ⭐)</option>
-            <option value="TNM Mpamba">🟣 TNM Mpamba</option>
-        </select>
-        <div class="airtel-banner"><span>📶</span><span>Airtel Number Recommended</span></div>
-        <div class="phone-input-group" id="regPhoneGroup" style="margin-top:0; border-radius:0 0 10px 10px;">
-            <span class="phone-prefix">🇲🇼 +265</span>
-            <input type="tel" id="phoneInput" placeholder="99XXXXXXX (Airtel numbers start with 99)" maxlength="12" pattern="[0-9]*" inputmode="numeric" oninput="validateAirtelNumber(this)">
+    <div id="chatTab" class="hidden">
+      <div class="user-layout">
+        <div class="user-list" id="usersListPanel">
+          <div class="user-list-header">All Users</div>
+          <div style="padding:20px;color:#333;text-align:center">Loading...</div>
         </div>
-        <div id="airtelValidationMsg" style="font-size:12px; margin-top:5px; text-align:left; padding-left:5px;"><span style="color:#888;">💡 Tip: Airtel numbers start with 99</span></div>
-        <input type="email" id="emailInput" placeholder="📧 Email (Required for Password Reset)">
-        <div class="input-wrapper"><input type="password" id="passwordInput" placeholder="Password (min 6 chars)"><span class="toggle-password" onclick="togglePassword('passwordInput', this)">👁️</span></div>
-        <div style="text-align:left;margin:10px 0;font-size:13px"><label><input type="checkbox" id="agreeCheck" style="width:auto;margin-right:8px">I am 18+ & agree to <a href="#" onclick="document.getElementById('termsModal').style.display='flex';return false" style="color:#00ffcc">Terms</a></label></div>
-        <div style="background:#222;padding:10px;border-radius:8px;margin:10px 0"><span id="captchaQ" style="color:#ffd700"></span> = <input type="number" id="captchaA" placeholder="?" style="width:80px;display:inline-block;margin:0"></div>
-        <button id="loginBtn" type="button">Create Account & Play</button>
-        <p id="loginMsg" style="margin-top:10px;"></p>
-        <div class="auth-links">Already have an account? <a onclick="showLogin()">Login here</a></div>
-    </div>
-    <div class="card" id="loginCard" style="display:none;">
-        <h3>👤 Login</h3>
-        <input type="text" id="loginUsernameInput" placeholder="Username">
-        <div class="input-wrapper"><input type="password" id="loginPasswordInput" placeholder="Password"><span class="toggle-password" onclick="togglePassword('loginPasswordInput', this)">👁️</span></div>
-        <button id="loginSubmitBtn" type="button">Login</button>
-        <p id="loginErrorMsg" style="margin-top:10px;"></p>
-        <div class="auth-links" id="forgotLinkRow"><a onclick="showForgotSection()" style="color:#ff922b;">Forgot Password?</a></div>
-        <div class="forgot-section" id="forgotSection">
-            <h4>🔑 Reset Password</h4>
-            <p style="font-size:12px;color:#aaa;margin-bottom:10px;text-align:center;">Enter the email you registered with.</p>
-            <input type="email" id="forgotEmailInput" placeholder="📧 Your registered email">
-            <button onclick="resetPassword()" id="resetBtn" style="background:linear-gradient(45deg,#ff922b,#ff6b6b);margin-top:8px;">Reset Password</button>
-            <p id="forgotMsg" style="margin-top:10px;font-size:13px;"></p>
-            <div class="new-password-box" id="newPasswordBox"><div style="font-size:12px;color:#51cf66;">✅ Your new password is:</div><div class="new-pass-value" id="newPassDisplay">---</div><div style="font-size:11px;color:#888;margin-top:5px;">Copy this and login now!</div><button onclick="copyNewPassword()" style="width:auto;padding:8px 20px;margin-top:8px;background:#51cf66;color:#000;font-size:13px;">📋 Copy Password</button></div>
-            <div class="forgot-back" onclick="hideForgotSection()">← Back to Login</div>
+        <div class="chat-area">
+          <div class="chat-header" id="chatHeader">
+            <span>Select a user to chat</span>
+            <div class="chat-mode-toggle" id="chatModeToggle" style="display:none">
+              <button class="chat-mode-btn active-mode" id="modeChatBtn" onclick="switchChatMode('chat')">Chat</button>
+              <button class="chat-mode-btn" id="modeInboxBtn" onclick="switchChatMode('inbox')">Inbox <span id="inboxBadge" class="inbox-badge" style="display:none">0</span></button>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages"><div class="empty-state">Select a user from the left to view and send messages</div></div>
+          <div id="adminRecordingBar" class="admin-recording-bar"><span class="rec-dot"></span><span>Recording voice note... Tap mic to stop</span><span id="adminRecTime" style="font-weight:700">0s</span></div>
+          <div class="chat-input-area">
+            <label class="chat-attach-btn">📎<input type="file" id="adminFileInput" accept="image/*" onchange="handleAdminFileUpload(event)"></label>
+            <button class="admin-voice-btn" id="adminVoiceBtn" onclick="toggleAdminVoiceNote()" title="Record Voice Note">🎤</button>
+            <input type="text" id="adminMsgInput" placeholder="Type message..." disabled>
+            <button onclick="sendAdminMsg()" id="adminSendBtn" disabled>Send</button>
+          </div>
         </div>
-        <div class="auth-links">Don't have an account? <a onclick="showRegister()">Create Account</a></div>
+      </div>
     </div>
-</div>
 
-<div id="profilePage" class="page">
-  <h1>👤 My Profile</h1>
-  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:15px;">
-     <div class="profile-pic-container" onclick="viewProfilePhoto()"><img id="profilePicImg" src="https://via.placeholder.com/100/111/00ffcc?text=U" class="profile-pic"><div class="profile-pic-upload-overlay">👁️ View</div></div>
-     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <button onclick="document.getElementById('profilePicInput').click()" style="width:auto;padding:8px 16px;font-size:13px;background:linear-gradient(45deg,#00ffcc,#00ccff);">📷 Update Photo</button>
-        <button onclick="viewProfilePhoto()" style="width:auto;padding:8px 16px;font-size:13px;background:#1a1a2e;color:#00ffcc;border:1px solid #00ffcc33;">🔍 View Photo</button>
-     </div>
-     <input type="file" id="profilePicInput" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none;">
-     <h2 id="profileDisplayName" style="color:#00ffcc;margin:0;">Loading...</h2>
-  </div>
-  <div class="card" style="text-align:left;">
-     <h3 style="text-align:center;margin-bottom:15px;">📋 Details</h3>
-     <div class="flex-row"><span>📱 Phone</span><span id="profilePhone" style="color:#fff">-</span></div>
-     <div class="flex-row"><span>📡 Network</span><span id="profileNetwork" style="color:#fff">-</span></div>
-     <div class="flex-row"><span>📧 Email</span><span id="profileEmail" style="color:#fff">-</span></div>
-     <div class="flex-row"><span>🆔 Username</span><span id="profileUsername" style="color:#fff">-</span></div>
-  </div>
-  <div class="card" style="text-align:left;">
-     <h3 style="text-align:center;margin-bottom:15px;">📊 Game Stats</h3>
-     <div class="stats-grid">
-        <div class="stat-box"><div class="stat-highlight" style="color:#51cf66" id="profileWinRate">0%</div><div class="stat-label">📊 Win Rate</div></div>
-        <div class="stat-box"><div class="stat-highlight" style="color:#ffd700" id="profileWinStreak">0</div><div class="stat-label">🔥 Win Streak</div></div>
-        <div class="stat-box"><div id="profileRankBox">-</div><div class="stat-label">🥉🥈🥇 Rank</div></div>
-     </div>
-     <div class="flex-row" style="margin-top:8px;"><span>🛡️ Verification</span><span id="profileVerification"><span class="verification-badge unverified">❌ Unverified</span></span></div>
-  </div>
-  <div class="card" style="text-align:left;padding:10px 0;">
-     <h3 style="text-align:center;margin-bottom:10px;padding:0 12px;">⚙️ Settings</h3>
-     <div class="profile-action-item" onclick="showEditDisplayName()"><span style="color:#ccc;font-size:14px;">✏️ Edit Display Name</span><span class="profile-action-arrow">›</span></div>
-     <div class="profile-action-item" onclick="showChangePassword()"><span style="color:#ccc;font-size:14px;">🔑 Change Password</span><span class="profile-action-arrow">›</span></div>
-     <div class="profile-action-item" style="cursor:default;"><span style="color:#ccc;font-size:14px;">🔊 Sound</span><label class="toggle-switch"><input type="checkbox" id="soundToggle" checked onchange="toggleSoundSetting()"><span class="toggle-slider"></span></label></div>
-     <div class="profile-action-item" onclick="showDeleteAccount()" style="border-bottom:none;"><span style="color:#ff6b6b;font-size:14px;">🗑️ Delete Account</span><span class="profile-action-arrow" style="color:#ff6b6b;">›</span></div>
-  </div>
-  <div class="card" style="text-align:left;">
-     <h3 style="text-align:center;margin-bottom:15px;">🏟️ Recent Matches</h3>
-     <div id="recentMatchesList" style="max-height:250px;overflow-y:auto;"><div style="text-align:center;color:#555;font-size:12px;padding:10px;">No matches yet</div></div>
-  </div>
-  <div style="text-align:center;color:#444;font-size:11px;margin-top:15px;padding:10px;letter-spacing:1px;">App Version 1.0.0</div>
-  <div style="text-align:right;margin-top:10px"><button onclick="logout()" style="width:auto;padding:10px 20px;background:#333;color:#ff6b6b;border:1px solid #ff6b6b44">🚪 Logout</button></div>
-</div>
-
-<div id="walletPage" class="page"><h1>💳 Wallet</h1><div class="card"><h3>💰 Balance</h3><p id="balanceText" style="font-size:28px;color:#ffd700;margin:10px 0;font-weight:bold;">💵 MWK 0</p></div><div class="card"><h3>📊 Game Stats</h3><div class="flex-row"><span>♟️ Played</span><span id="statPlayed" style="color:#fff;font-weight:bold">0</span></div><div class="flex-row"><span>🏆 Won</span><span id="statWon" style="color:#51cf66;font-weight:bold">0</span></div><div class="flex-row"><span>😞 Lost</span><span id="statLost" style="color:#ff6b6b;font-weight:bold">0</span></div></div><div class="card referral-card"><h3>🤝 Invite & Earn</h3><p style="font-size:13px;color:#ccc;margin-bottom:10px">Earn <b style="color:#ffd700">MWK 10</b> per 5 friends!</p><div style="font-size:14px;color:#fff;margin-bottom:10px">Referred: <span id="refCount" style="color:#51cf66;font-weight:bold">0</span></div><div class="referral-link-box"><input type="text" id="refLinkInput" readonly><button class="copy-btn" onclick="copyRefLink()">Copy</button></div><button id="claimRefBtn" onclick="claimReferralBonus()" style="display:none;margin-top:10px;background:linear-gradient(45deg,#ffd700,#ffaa00)">🎉 Claim MWK 10</button></div><div class="card"><h3>📱 Withdrawal Method</h3><div id="paymentLockedBox" class="payment-locked-box" style="display:none"><div class="payment-locked-title">💳 Registered Phone (Locked)</div><div class="payment-locked-row"><div style="text-align:left"><div class="payment-locked-label" id="payNetworkLabel">Network</div><div class="payment-locked-phone" id="payPhoneLabel">---</div></div><div class="payment-locked-flag">🇲🇼</div></div><div class="payment-locked-divider"></div><div class="payment-locked-secure">🔒 Withdrawals sent here automatically</div></div><div id="paymentNoPhone" style="display:none;padding:15px;background:#1a1a0a;border-radius:10px;border:1px solid #ffaa00"><p style="color:#ffaa00">⚠ No payment phone on file</p></div></div>
-<div class="card">
-    <h3>💰 How to Deposit</h3>
-    <div class="deposit-rules">
-        <div class="deposit-step" data-num="1">Send Money to <b>GIFT MEZA</b> (Airtel Code: <b style="color:#00ffcc">378205</b>) via Airtel Money.</div>
-        <div class="deposit-step" data-num="2">Use your <b>Username</b> as the Reference Name.</div>
-        <div class="deposit-step" data-num="3">Copy the <b>Transaction ID</b> from the SMS you receive.</div>
-        <div class="deposit-step" data-num="4">Enter Amount & TxID below, then click Submit.</div>
-        <div class="deposit-step" data-num="5">⚠️ <b>IMPORTANT:</b> After clicking submit, upload the <b>Screenshot</b> of your SMS in the chat that opens automatically.</div>
-        <span class="deposit-warning">Failure to upload screenshot proof will result in declined deposit.</span>
-    </div>
-    <h3>📝 Submit Deposit Request</h3>
-    <div style="background:#1a1a0a;padding:15px;border-radius:10px;border:1px solid #ffd700;margin-bottom:15px;text-align:center">
-        <p style="color:#ffd700;font-weight:bold;margin-bottom:8px">📲 Account Details:</p>
-        <p style="color:#fff;font-size:16px;font-weight:bold">GIFT MEZA</p>
-        <p style="color:#00ffcc;font-size:22px;font-weight:bold;letter-spacing:1px">Airtel Code: 378205</p>
-    </div>
-    <input type="number" id="depositAmountInput" placeholder="Amount MWK (min 50)" min="50" inputmode="numeric">
-    <input type="text" id="depositTxIdInput" placeholder="Transaction ID from SMS" maxlength="20">
-    <button onclick="submitDepositRequest()" style="background: linear-gradient(45deg,#00ffcc,#00ccff);">Submit & Go to Chat</button>
-    <p id="depositMsg" style="margin-top:10px;"></p>
-    <div id="myDepositHistory" class="history-list"></div>
-</div>
-<div class="card"><h3>💸 Withdraw</h3><select id="withdrawAmount"><option value="100">100 MWK</option><option value="200">200 MWK</option><option value="500">500 MWK</option></select><button onclick="submitWithdrawRequest()">Request Withdrawal</button><p id="msg" style="margin-top:10px;"></p></div><div class="card"><h3>📜 Withdrawal History</h3><div id="myWithdrawHistory" class="history-list" style="border-top:none; padding-top:0; margin-top:0;"></div></div><div class="card" style="border-color:#ff6b6b44"><h3>⚠️ Rules</h3><div style="text-align:left;color:#ccc;line-height:1.8;font-size:12px">1. Process time up to <b style="color:#fff">3 hours</b>.<br>2. Min withdrawal 100 MWK.<br>3. Withdrawals sent to your registered phone number.<br>4. Fake activity = Permanent ban.</div></div><div style="margin-top:20px;padding:20px;background:#111;border-radius:15px;border:1px solid #222"><div style="font-size:28px;margin-bottom:10px">🔞</div><p style="color:#ff6b6b;font-weight:bold;font-size:16px">18+ Only</p><div style="display:flex;justify-content:center;gap:15px;font-size:13px;margin:15px 0"><a href="#" onclick="document.getElementById('termsModal').style.display='flex';return false" style="color:#00ccff">Terms</a><a href="#" onclick="document.getElementById('privacyModal').style.display='flex';return false" style="color:#00ccff">Privacy</a></div><a href="https://chat.whatsapp.com/CmvdLsifPKS51OyRnrITFz" target="_blank" style="display:block;background:#25d366;color:#fff;padding:12px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:14px">💬 Join WhatsApp Group</a></div></div>
-
-<div id="playPage" class="page"><h1>♟️ PvP Checkers</h1><p style="color:#ccc;margin-bottom:20px">Choose stake and play for real money! ♟️ Play any grade anytime — no limits!</p><div class="grade-grid" id="gradeGrid"></div><div class="card" style="margin-top:30px"><h3>📜 Game Rules (Malawi)</h3><div style="text-align:left;color:#ccc;line-height:1.8;font-size:13px">1. Fee deducted when match found.<br>2. Matched with real player.<br>3. Winner takes 80%.<br>4. 20% platform fee.<br>5. Disconnect = lose.<br>6. <b style="color:#fff">Capture backward is allowed.</b><br>7. <b style="color:#fff">Multiple jumps are forced.</b> (Keep jumping!).<br>8. If you can capture, you must capture.<br>9. <b style="color:#fff">Only Kings can fly (long jumps).</b><br><br><b style="color:#ffd700">⚖️ Draw Rules:</b><br>10. <b style="color:#00ffcc">King vs King</b> = Immediate draw (both refunded).<br>11. <b style="color:#00ffcc">One piece left</b> = Opponent gets <b style="color:#ffd700">12 moves</b> to catch it. If not caught = draw (both refunded).</div></div></div>
-
-<div id="inboxPage" class="page">
-  <h1>📥 Admin Inbox</h1>
-  <div style="background:#1a1a2e; padding:10px; border-radius:8px; border-left:4px solid #00ffcc; margin-bottom:15px; font-size:12px; color:#ddd; text-align:left;">ℹ️ <b>Tip:</b> Upload the screenshot of your deposit SMS here using the 📎 button.</div>
-  <div id="inboxMessages" class="card" style="height: 350px; overflow-y: auto; margin-bottom: 15px; text-align: left; background: #0a0a0a;"><div style="text-align:center;color:#555;padding:20px;">Loading...</div></div>
-  <div class="card">
-     <h3>Send Message to Admin</h3>
-     <div class="chat-input-bar" style="margin-bottom:10px;">
-        <label class="chat-attach-btn" style="font-size:16px;">📎<input type="file" id="inboxFileInput" accept="image/*,.pdf,.doc,.docx,.txt,.zip" onchange="handleInboxFileUpload(event)"></label>
-        <input type="text" id="inboxMsgInput" placeholder="Type your message..." style="flex:1; margin:0;" onkeypress="if(event.key==='Enter'){event.preventDefault();sendInboxMsg();}">
-        <button onclick="sendInboxMsg()" style="width:auto; padding:12px 18px; flex-shrink:0; margin:0;">Send</button>
-     </div>
-     <div id="inboxFilePreview" style="display:none; font-size:12px; color:#00ffcc; margin-top:10px;">Attached: <span id="inboxFileName"></span> <button onclick="clearInboxFile()" style="width:auto; padding:2px 8px; background:transparent; color:#ff6b6b; border:none; margin:0; font-size:14px;">✕</button></div>
-  </div>
-</div>
-
-<div id="gamePage" class="page">
-  <button onclick="exitGame()" style="width:auto;padding:10px 20px;background:#333;color:#ff6b6b;margin-bottom:10px">✕ Exit</button>
-  <div class="pvp-board-container">
-    <div class="pvp-info-bar">
-      <div class="pvp-player" style="color:#ff6b6b" id="p1Name">P1</div>
-      <div class="pvp-turn" id="turnIndicator">Starting...</div>
-      <div class="pvp-player" style="color:#ccc" id="p2Name">P2</div>
-    </div>
-    <div class="checkers-board" id="checkersBoard"></div>
-    <div id="drawCounterBar" class="draw-counter-bar">⏱️ Draw in <span id="drawMovesLeft">12</span> moves</div>
-    <div class="pvp-info-bar" style="margin-top:10px;background:#0a0a0a">
-      <div style="font-size:12px;color:#888">Stake: <span id="gameStake" style="color:#ffd700">0</span></div>
-      <div style="font-size:12px;color:#888">Prize: <span id="gamePrize" style="color:#51cf66">0</span></div>
+    <div id="vpnTab" class="card hidden">
+      <h3 style="margin-bottom:6px;color:#e0e0e0">VPN Detection Logs</h3>
+      <p style="font-size:12px;color:#555;margin-bottom:15px">Monitors users who log in. VPN/Proxy IPs are flagged here.</p>
+      <div style="overflow-x:auto"><table><thead><tr><th>User</th><th>IP Address</th><th>VPN Status</th><th>Date Checked</th><th>Actions</th></tr></thead><tbody id="vpnBody"></tbody></table></div>
     </div>
   </div>
 </div>
 
-<div id="chatPage" class="page"><h1>💬 Chat</h1><input type="text" id="chatSearchInput" class="chat-search-input" placeholder="🔍 Search users..." oninput="filterChatUsers()"><div id="chatUserList" class="card chat-user-list"></div></div>
-
-<div id="chatConvPage" class="page">
-  <div class="chat-header-bar">
-    <button class="chat-back-btn" onclick="backToChatList()">←</button>
-    <div class="chat-conv-avatar" id="chatConvAvatar">?</div>
-    <div style="flex:1;text-align:left"><div id="chatConvName" style="font-weight:bold;font-size:15px;color:#fff"></div><div id="chatConvStatus" style="font-size:11px;color:#888"></div></div>
-    <button class="chat-clear-btn" onclick="clearChat()">🗑️</button>
+<!-- ===== LIVE BOARD MODAL ===== -->
+<div id="boardModal" class="modal-overlay">
+  <div class="modal-content" style="text-align:center">
+    <h3 style="color:#00ffcc;margin-bottom:5px">Live Match View</h3>
+    <div id="modalGameInfo" style="font-size:12px;color:#888;margin-bottom:10px"></div>
+    <div id="modalBoardContainer" class="modal-board"></div>
+    <div id="modalDrawInfo" style="font-size:13px;color:#ffd700;margin-top:10px;font-weight:700"></div>
+    <br>
+    <button onclick="closeBoardModal()" style="background:#1a2332;color:#fff;padding:10px 30px;border:1px solid #333;border-radius:8px;cursor:pointer;font-weight:700">Close</button>
   </div>
-  <div id="chatMessages" class="chat-messages-box"></div>
-  <div id="replyPreview" class="chat-reply-preview-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="flex:1;min-width:0"><div style="font-size:10px;color:#00ffcc;margin-bottom:2px" id="replyPreviewLabel">Replying to</div><div id="replyPreviewText" style="font-size:12px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div></div><button onclick="cancelReply()" style="width:auto;padding:4px 10px;background:transparent;color:#ff6b6b;font-size:16px;margin:0;cursor:pointer;border:none">✕</button></div></div>
-  <div id="recordingStatus" style="display:none;padding:5px;background:#1a0000;border-radius:8px 8px 0 0"><span class="recording-indicator">🔴 Recording Voice Note... Tap 🎤 to stop</span></div>
-  <div class="chat-input-bar"><label class="chat-attach-btn">📎<input type="file" id="chatFileInput" accept="image/*" onchange="handleChatFileUpload(event)"></label><button class="chat-voice-btn" id="voiceNoteBtn" onclick="toggleVoiceNote()">🎤</button><input type="text" id="chatMsgInput" placeholder="Type a message..." style="flex:1" onkeypress="if(event.key==='Enter'){event.preventDefault();sendChatMsg();}"><button onclick="sendChatMsg()" style="width:auto;padding:12px 18px;flex-shrink:0;margin:0">Send</button></div>
-</div>
 </div>
 
-<div class="nav" id="mainNav">
-  <button class="nav-btn active" id="navProfile"><span class="nav-icon">👤</span>Profile</button>
-  <button class="nav-btn" id="navWallet"><span class="nav-icon">💳</span>Wallet</button>
-  <button class="nav-btn" id="navChat"><span class="nav-icon">💬</span>Chat</button>
-  <button class="nav-btn" id="navPlay"><span class="nav-icon">♟️</span>Play</button>
-  <button class="nav-btn" id="navInbox"><span class="nav-icon">📥</span>Inbox <span id="inboxNotifDot" class="notification-dot" style="display:none;"></span></button>
+<!-- ===== USER EDIT MODAL ===== -->
+<div id="userEditModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 id="editModalTitle">Edit User</h3>
+    <div id="editModalBody"></div>
+  </div>
 </div>
 
 <script>
-/* ===== SAFE IMAGE VIEWER ===== */
-function openImageViewer(src){document.getElementById('imageViewerImg').src=src;document.getElementById('imageViewerModal').style.display='flex'}
-function closeImageViewer(){document.getElementById('imageViewerModal').style.display='none';document.getElementById('imageViewerImg').src=''}
-function saveImageFromViewer(){try{var src=document.getElementById('imageViewerImg').src;if(!src)return;var a=document.createElement('a');a.href=src;a.download='mada_photo_'+Date.now()+'.jpg';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500);alert('💾 Image saved!')}catch(e){alert('Tap and hold the image to save.')}}
+const ADMIN_EMAIL = "admin@mada.com";
+const ADMIN_NAME = "Admin_Mada";
+let currentChatUser = null;
+let cachedLeaderboard = {};
+let cachedUsersNode = {};
+let currentChatMode = 'chat';
+let adminMediaRecorder = null;
+let adminAudioChunks = [];
+let isAdminRecording = false;
+let adminRecTimer = null;
+let adminRecSeconds = 0;
+let adminMessagesCache = {};
+let inboxUnreadCounts = {};
+let toastTimer = null;
+let lastDepositSnap = null;
+let lastWithdrawalSnap = null;
+let lastVpnSnap = null;
 
-/* ===== SOUND EFFECTS ENGINE ===== */
-var audioCtx=null;
-function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
-function playSound(type){if(localStorage.getItem('soundDisabled')==='true')return;try{var ctx=getAudioCtx();if(ctx.state==='suspended')ctx.resume();var osc=ctx.createOscillator();var gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);gain.gain.value=0.2;if(type==='move'){osc.frequency.value=400;osc.type='sine';gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.1);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.1)}else if(type==='capture'){osc.frequency.value=200;osc.type='square';gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.2);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.2)}else if(type==='win'){osc.frequency.value=523.25;osc.type='sine';osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.15);var o2=ctx.createOscillator();var g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);g2.gain.value=0.2;o2.frequency.value=659.25;o2.type='sine';o2.start(ctx.currentTime+0.15);o2.stop(ctx.currentTime+0.3);var o3=ctx.createOscillator();var g3=ctx.createGain();o3.connect(g3);g3.connect(ctx.destination);g3.gain.value=0.2;o3.frequency.value=783.99;o3.type='sine';o3.start(ctx.currentTime+0.3);o3.stop(ctx.currentTime+0.5)}else if(type==='lose'){osc.frequency.value=400;osc.type='sawtooth';gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.5);osc.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+0.5);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.5)}}catch(e){}}
+const firebaseConfig = {
+  apiKey: "AIzaSyDy17a8q0idnDEILFWaIn2b1U_vIiQoRLw",
+  authDomain: "mada-checker.firebaseapp.com",
+  databaseURL: "https://mada-checker-default-rtdb.firebaseio.com",
+  projectId: "mada-checker",
+  storageBucket: "mada-checker.firebasestorage.app",
+  messagingSenderId: "51892649844",
+  appId: "1:51892649844:web:a15526d0cad7629820f621",
+  measurementId: "G-6EF4R4GL48"
+};
 
-/* ===== CORE APP ===== */
-var db=null;
-try{if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length===0){firebase.initializeApp({apiKey:"AIzaSyBRDfT-P8wzVAAZs8lveF1-ZTf8QlpRC5g",authDomain:"apple-green-ded09.firebaseapp.com",databaseURL:"https://apple-green-ded09-default-rtdb.firebaseio.com",projectId:"apple-green-ded09",storageBucket:"apple-green-ded09.firebasestorage.app",messagingSenderId:"1093712798003",appId:"1:1093712798003:web:2a945cd7fc76641dab5e46"});db=firebase.database();var appCheck=firebase.appCheck();appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider('6LeoB_8sAAAAAJS4kepjICEYny7besSCK4mv3l9Q'),true);appCheck.getToken().then(function(t){var b=document.getElementById('appcheckBadge');if(b){if(t&&t.token){b.className='appcheck-badge ok';b.textContent='🔒 App Check: Active';setTimeout(function(){b.style.display='none'},3000)}else{b.className='appcheck-badge fail';setTimeout(function(){b.style.display='none'},5000)}}}).catch(function(){var b=document.getElementById('appcheckBadge');if(b){b.className='appcheck-badge fail';setTimeout(function(){b.style.display='none'},5000)}})}}catch(e){db=null}
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
 
-var DAILY_LIMIT=12000;var gameState={};var captchaAnswer=0;
-var PVP_GRADES=[{id:1,name:'Grade 1',entryMWK:50,winMWK:80,icon:'🥉'},{id:2,name:'Grade 2',entryMWK:200,winMWK:320,icon:'🥈'},{id:3,name:'Grade 3',entryMWK:500,winMWK:800,icon:'🥇'},{id:4,name:'Grade 4',entryMWK:1000,winMWK:1600,icon:'💎'}];
-var myUid=null;var myPlayerNumber=0;var currentGameId=null;var gameListener=null;var processedGameEnds={};
+/* ===== TOAST ===== */
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'edit-toast ' + (type || 'success');
+  clearTimeout(toastTimer);
+  setTimeout(function(){ t.classList.add('show'); }, 10);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
 
-function escapeHtml(t){if(!t)return'';var d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function generateCaptcha(){var a=Math.floor(Math.random()*10)+1;var b=Math.floor(Math.random()*10)+1;captchaAnswer=a+b;var el=document.getElementById('captchaQ');if(el)el.innerText=a+' + '+b}
-function formatMalawiPhone(i){var d=i.replace(/[^0-9]/g,'');if(d.length===9&&/^[98][89]/.test(d))return'0'+d;if(d.length===10&&/^0[98][89]/.test(d))return d;if(d.length===12&&/^265[98][89]/.test(d))return'+'+d;return d}
-function isValidMalawiPhone(p){return/^(\+265|0)(99|88)[0-9]{7}$/.test(p)}
-function emailToKey(e){if(!e)return'';return e.toLowerCase().trim().replace(/\./g,'_dot_').replace(/#/g,'_hash_').replace(/\$/g,'_dollar_').replace(/\[/g,'_lb_').replace(/\]/g,'_rb_').replace(/\//g,'_slash_')}
-function lockPaymentMethod(p,n){var l=document.getElementById('paymentLockedBox'),np=document.getElementById('paymentNoPhone'),pl=document.getElementById('payPhoneLabel'),nl=document.getElementById('payNetworkLabel');if(p&&n){if(l)l.style.display='block';if(np)np.style.display='none';if(pl)pl.innerText=p;if(nl)nl.innerText=n}else{if(l)l.style.display='none';if(np)np.style.display='block'}}
-function loadProfile(){if(!db||!myUid)return;db.ref('users/'+myUid).once('value',function(s){var d=s.val()||{};document.getElementById('profilePhone').innerText=d.phone||'N/A';document.getElementById('profileNetwork').innerText=d.network||'N/A';document.getElementById('profileEmail').innerText=d.email||'N/A';document.getElementById('profileUsername').innerText=myUid});db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{};document.getElementById('profileDisplayName').innerText=d.displayName||myUid;var i=document.getElementById('profilePicImg');if(d.profilePic)i.src=d.profilePic;else i.src='https://via.placeholder.com/100/111/00ffcc?text='+(d.displayName||myUid)[0].toUpperCase()});db.ref('leaderboard_all/'+myUid+'/profilePic').on('value',function(s){var p=s.val();if(p)document.getElementById('profilePicImg').src=p});loadProfileStats();loadRecentMatches();var soundToggle=document.getElementById('soundToggle');if(soundToggle)soundToggle.checked=localStorage.getItem('soundDisabled')!=='true'}
+/* ===== AUTH ===== */
+function login() {
+  var email = document.getElementById("emailInput").value.trim();
+  var pass = document.getElementById("passwordInput").value;
+  if (!email || !pass) { document.getElementById("loginError").innerText = "Enter email and password."; return; }
+  document.getElementById("loginError").innerText = "Logging in...";
+  auth.signInWithEmailAndPassword(email, pass).catch(function(error) {
+    document.getElementById("loginError").innerText = "Login failed: " + error.message;
+  });
+}
+function logout() { auth.signOut(); }
 
-function loadProfileStats(){if(!db||!myUid)return;db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{};var played=parseInt(d.gamesPlayed)||0;var won=parseInt(d.gamesWon)||0;var winRate=played>0?Math.round((won/played)*100):0;var winStreak=d.winStreak||0;document.getElementById('profileWinRate').innerText=winRate+'%';document.getElementById('profileWinStreak').innerText=winStreak;db.ref('leaderboard_all').once('value',function(allSnap){var users=[];allSnap.forEach(function(child){var ud=child.val()||{};users.push({uid:child.key,wins:parseInt(ud.gamesWon)||0,streak:ud.winStreak||0})});users.sort(function(a,b){return b.wins-a.wins||b.streak-a.streak});var rank=-1;for(var i=0;i<users.length;i++){if(users[i].uid===myUid){rank=i+1;break}}var rankBox=document.getElementById('profileRankBox');if(rank>0){var rankClass=rank===1?'rank-gold':(rank===2?'rank-silver':(rank===3?'rank-bronze':'rank-default'));var rankEmoji=rank===1?'🥇':(rank===2?'🥈':(rank===3?'🥉':'🏅'));rankBox.innerHTML='<span class="rank-badge '+rankClass+'" style="font-size:16px;">'+rankEmoji+' #'+rank+'</span>'}else{rankBox.innerHTML='<span style="color:#555;font-size:16px;">#-</span>'}});db.ref('users/'+myUid).once('value',function(us){var ud=us.val()||{};var verEl=document.getElementById('profileVerification');if(ud.email&&ud.phone){verEl.innerHTML='<span class="verification-badge verified">✅ Verified</span>'}else{verEl.innerHTML='<span class="verification-badge unverified">❌ Unverified</span>'}})})}
-
-function loadRecentMatches(){if(!db||!myUid)return;db.ref('match_history/'+myUid).orderByChild('timestamp').limitToLast(10).once('value',function(s){var el=document.getElementById('recentMatchesList');if(!s.exists()){el.innerHTML='<div style="text-align:center;color:#555;font-size:12px;padding:10px;">No matches yet</div>';return}var matches=[];s.forEach(function(c){matches.push(c.val())});matches.reverse();var html='';matches.forEach(function(m){var resultClass=m.result==='win'?'match-result-win':(m.result==='loss'?'match-result-loss':'match-result-draw');var resultText=m.result==='win'?'🏆 WIN':(m.result==='loss'?'😞 LOSS':'🤝 DRAW');var amtColor=m.result==='win'?'#51cf66':(m.result==='loss'?'#ff6b6b':'#ffd700');var amountText=m.result==='win'?'+MWK '+m.amount:(m.result==='loss'?'-MWK '+m.amount:'Refunded');html+='<div class="recent-match-item">';html+='<div style="text-align:left"><span style="color:#ccc;font-size:13px">vs '+escapeHtml(m.opponent||'?')+'</span><br><span style="color:#555;font-size:10px">'+new Date(m.timestamp).toLocaleDateString()+' '+new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';html+='<div style="text-align:right"><span class="'+resultClass+'">'+resultText+'</span><br><span style="font-size:11px;color:'+amtColor+'">'+amountText+'</span></div>';html+='</div>'});el.innerHTML=html})}
-
-function showEditDisplayName(){document.getElementById('editNameModal').style.display='flex';var currentName=document.getElementById('profileDisplayName').innerText;document.getElementById('editNameInput').value=currentName;document.getElementById('editNameMsg').innerHTML=''}
-function closeEditNameModal(){document.getElementById('editNameModal').style.display='none'}
-function saveDisplayName(){var newName=(document.getElementById('editNameInput').value||'').trim();var msgEl=document.getElementById('editNameMsg');if(!newName||newName.length<2){msgEl.innerHTML='<span class="error">Name must be at least 2 characters</span>';return}if(!db||!myUid){msgEl.innerHTML='<span class="error">Error</span>';return}msgEl.innerHTML='<span class="success">Saving...</span>';db.ref('leaderboard_all/'+myUid+'/displayName').set(newName,function(err){if(err){msgEl.innerHTML='<span class="error">Failed: '+err.message+'</span>'}else{document.getElementById('profileDisplayName').innerText=newName;msgEl.innerHTML='<span class="success">✅ Display name updated!</span>';setTimeout(closeEditNameModal,1000)}})}
-
-function showChangePassword(){document.getElementById('changePasswordModal').style.display='flex';document.getElementById('oldPasswordInput').value='';document.getElementById('newPasswordInput').value='';document.getElementById('confirmPasswordInput').value='';document.getElementById('changePasswordMsg').innerHTML=''}
-function closeChangePasswordModal(){document.getElementById('changePasswordModal').style.display='none'}
-function changePassword(){var oldPass=document.getElementById('oldPasswordInput').value||'';var newPass=document.getElementById('newPasswordInput').value||'';var confirmPass=document.getElementById('confirmPasswordInput').value||'';var msgEl=document.getElementById('changePasswordMsg');if(!oldPass){msgEl.innerHTML='<span class="error">Enter current password</span>';return}if(newPass.length<6){msgEl.innerHTML='<span class="error">New password min 6 chars</span>';return}if(newPass!==confirmPass){msgEl.innerHTML='<span class="error">Passwords don\'t match</span>';return}if(!db||!myUid){msgEl.innerHTML='<span class="error">Error</span>';return}msgEl.innerHTML='<span class="success">Checking...</span>';db.ref('users/'+myUid+'/password').once('value',function(s){var storedHash=s.val();if(storedHash!==md5(oldPass)){msgEl.innerHTML='<span class="error">❌ Current password is wrong</span>';return}db.ref('users/'+myUid+'/password').set(md5(newPass),function(err){if(err){msgEl.innerHTML='<span class="error">Failed: '+err.message+'</span>'}else{msgEl.innerHTML='<span class="success">✅ Password changed!</span>';setTimeout(closeChangePasswordModal,1000)}})})}
-
-function toggleSoundSetting(){var toggle=document.getElementById('soundToggle');if(toggle.checked){localStorage.removeItem('soundDisabled')}else{localStorage.setItem('soundDisabled','true')}}
-
-function showDeleteAccount(){document.getElementById('deleteAccountModal').style.display='flex';document.getElementById('deleteConfirmInput').value='';document.getElementById('deleteAccountMsg').innerHTML=''}
-function closeDeleteAccountModal(){document.getElementById('deleteAccountModal').style.display='none'}
-function confirmDeleteAccount(){var confirmText=(document.getElementById('deleteConfirmInput').value||'').trim();var msgEl=document.getElementById('deleteAccountMsg');if(confirmText!=='DELETE'){msgEl.innerHTML='<span class="error">Type DELETE to confirm</span>';return}if(!db||!myUid){msgEl.innerHTML='<span class="error">Error</span>';return}msgEl.innerHTML='<span class="error">Deleting account...</span>';db.ref('users/'+myUid).once('value',function(userSnap){var userData=userSnap.val()||{};var email=userData.email;db.ref('users/'+myUid).remove();db.ref('leaderboard_all/'+myUid).remove();db.ref('match_history/'+myUid).remove();db.ref('online_status/'+myUid).remove();db.ref('admin_inbox/'+myUid).remove();if(email){var ek=emailToKey(email);db.ref('email_index/'+ek).remove()}db.ref('referrals').once('value',function(refSnap){refSnap.forEach(function(r){if(r.val()&&r.val()[myUid]){db.ref('referrals/'+r.key+'/'+myUid).remove()}})});db.ref('password_resets/'+myUid).remove();localStorage.removeItem('user');localStorage.removeItem('userPhone');localStorage.removeItem('network');myUid=null;alert('Account deleted. Goodbye!');location.reload()})}
-
-function viewProfilePhoto(){var img=document.getElementById('profilePicImg');if(img&&img.src&&img.src.indexOf('placeholder')===-1){openImageViewer(img.src)}else{alert('📷 No profile photo yet. Tap "Update Photo" to add one!')}}
-
-function handleProfilePicUpload(e){var f=e.target.files&&e.target.files[0];if(!f||!db||!myUid)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=300,h=300,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);db.ref('leaderboard_all/'+myUid+'/profilePic').set(c.toDataURL('image/jpeg',0.6),function(err){if(err)alert('Upload failed: '+err.message)})};img.src=ev.target.result};r.readAsDataURL(f);e.target.value=''}
-function togglePassword(id,el){var x=document.getElementById(id);if(!x)return;if(x.type==="password"){x.type="text";if(el)el.textContent='🙈'}else{x.type="password";if(el)el.textContent='👁️'}}
-function showForgotSection(){document.getElementById('forgotLinkRow').style.display='none';document.getElementById('forgotSection').style.display='block';document.getElementById('forgotMsg').innerHTML='';document.getElementById('newPasswordBox').style.display='none';document.getElementById('forgotEmailInput').value=''}
-function hideForgotSection(){document.getElementById('forgotSection').style.display='none';document.getElementById('forgotLinkRow').style.display='block';document.getElementById('forgotMsg').innerHTML='';document.getElementById('newPasswordBox').style.display='none'}
-function resetPassword(){var email=(document.getElementById('forgotEmailInput').value||'').trim(),msgEl=document.getElementById('forgotMsg'),resetBtn=document.getElementById('resetBtn');if(!email||!email.includes('@')){msgEl.innerHTML='<span class="error">Enter a valid email.</span>';return}if(!db){msgEl.innerHTML='<span class="error">DB error.</span>';return}resetBtn.disabled=true;resetBtn.innerText='Searching...';msgEl.innerHTML='<span class="success">Looking up...</span>';var ek=emailToKey(email);db.ref('email_index/'+ek).once('value').then(function(is){if(is.val()&&is.val().uid){performPasswordReset(is.val().uid,email,msgEl,resetBtn)}else{db.ref('users').once('value').then(function(sn){var fu=null;sn.forEach(function(c){if(c.val().email&&c.val().email.toLowerCase()===email.toLowerCase())fu=c.key});if(fu){db.ref('email_index/'+ek).set({uid:fu});performPasswordReset(fu,email,msgEl,resetBtn)}else{msgEl.innerHTML='<span class="error">❌ No account found.</span>';resetBtn.disabled=false;resetBtn.innerText='Reset Password'}})}}).catch(function(){msgEl.innerHTML='<span class="error">Error</span>';resetBtn.disabled=false;resetBtn.innerText='Reset Password'})}
-function performPasswordReset(uid,email,msgEl,resetBtn){var chars='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789',np='';for(var i=0;i<8;i++)np+=chars.charAt(Math.floor(Math.random()*chars.length));db.ref('users/'+uid).update({password:md5(np)}).then(function(){db.ref('password_resets/'+uid).push({email:email,timestamp:Date.now()});showNewPasswordOnScreen(np,msgEl,resetBtn)})}
-function showNewPasswordOnScreen(np,msgEl,resetBtn){msgEl.innerHTML='<span class="success">✅ Password reset!</span>';resetBtn.disabled=false;resetBtn.innerText='Reset Password';document.getElementById('newPassDisplay').textContent=np;document.getElementById('newPasswordBox').style.display='block'}
-function copyNewPassword(){var p=document.getElementById('newPassDisplay').textContent;if(navigator.clipboard)navigator.clipboard.writeText(p).then(function(){alert('Copied! ✅')});else{var t=document.createElement('input');t.value=p;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Copied! ✅')}}
-function showRegister(){document.getElementById('registerCard').style.display='block';document.getElementById('loginCard').style.display='none';generateCaptcha()}
-function showLogin(){document.getElementById('registerCard').style.display='none';document.getElementById('loginCard').style.display='block';hideForgotSection()}
-function validateAirtelNumber(input){var val=input.value.replace(/[^0-9]/g,'');var msgEl=document.getElementById('airtelValidationMsg');var networkSelect=document.getElementById('networkRegInput');if(val.length>=2){if(val.substring(0,2)==='99'){msgEl.innerHTML='<span style="color:#51cf66;">✅ Airtel number detected - Perfect!</span>';if(networkSelect.value!=='Airtel Money')networkSelect.value='Airtel Money'}else if(val.substring(0,2)==='88'){msgEl.innerHTML='<span style="color:#ffd700;">⚠️ TNM number detected - Airtel is recommended</span>';if(networkSelect.value!=='TNM Mpamba')networkSelect.value='TNM Mpamba'}else{msgEl.innerHTML='<span style="color:#ff6b6b;">❌ Invalid Malawi number</span>'}}else{msgEl.innerHTML='<span style="color:#888;">💡 Tip: Airtel numbers start with 99</span>'}}
-function checkAirtelRecommend(){var network=document.getElementById('networkRegInput').value;var msgEl=document.getElementById('airtelValidationMsg');if(network==='TNM Mpamba'){msgEl.innerHTML='<span style="color:#ffd700;">⚠️ You selected TNM. Airtel (99) is recommended!</span>'}}
-
-function register(){try{var user=(document.getElementById("usernameInput").value||"").trim(),networkReg=document.getElementById("networkRegInput").value,phoneDigits=(document.getElementById("phoneInput").value||"").trim(),email=(document.getElementById("emailInput").value||"").trim(),pass=document.getElementById("passwordInput").value||"",agree=document.getElementById("agreeCheck").checked,captcha=parseInt(document.getElementById("captchaA").value),msgEl=document.getElementById("loginMsg");if(user.length<3){msgEl.innerHTML='<span class="error">Username min 3</span>';return}if(!networkReg){msgEl.innerHTML='<span class="error">Select network</span>';return}var fullPhone=formatMalawiPhone(phoneDigits);if(!isValidMalawiPhone(fullPhone)){msgEl.innerHTML='<span class="error">Invalid Phone</span>';return}var isAirtel=fullPhone.match(/^(?:\+265|0)99/);if(!isAirtel){if(!confirm('You entered a TNM number (88). Airtel (99) is recommended for faster deposits. Continue anyway?'))return}if(!email){msgEl.innerHTML='<span class="error">Enter email</span>';return}if(pass.length<6){msgEl.innerHTML='<span class="error">Password min 6</span>';return}if(!agree){msgEl.innerHTML='<span class="error">Must agree</span>';return}if(captcha!==captchaAnswer){msgEl.innerHTML='<span class="error">Wrong captcha</span>';generateCaptcha();return}msgEl.innerHTML='<span class="success">Creating...</span>';var name=user.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,''),refCode=new URLSearchParams(window.location.search).get('ref');if(refCode){try{localStorage.setItem('refCode',refCode)}catch(e){}}var savedRefCode=localStorage.getItem('refCode')||null;try{localStorage.setItem("user",name);localStorage.setItem("userPhone",fullPhone);localStorage.setItem("network",networkReg)}catch(e){}myUid=name;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('profile');setTimeout(function(){if(!db)return;var ek=emailToKey(email);db.ref('users/'+name).set({phone:fullPhone,network:networkReg,email:email,created:Date.now(),password:md5(pass),winStreak:0});db.ref('email_index/'+ek).set({uid:name});db.ref('leaderboard_all/'+name).once('value',function(sn){if(!sn.exists()){db.ref('leaderboard_all/'+name).set({coins:0,score:0,gamesPlayed:0,gamesWon:0,gamesLost:0,winStreak:0,referralClaimed:0,banned:false,lastPlayed:Date.now(),displayName:user,phone:fullPhone,network:networkReg});if(savedRefCode&&savedRefCode!==name)db.ref('referrals/'+savedRefCode+'/'+name).set(true)}});lockPaymentMethod(fullPhone,networkReg);initGameListeners();setupInboxNotif()},200)}catch(e){alert("Error: "+e.message)}}
-
-function login(){try{var rawName=(document.getElementById("loginUsernameInput").value||"").trim(),pass=document.getElementById("loginPasswordInput").value,msgEl=document.getElementById("loginErrorMsg");if(!rawName||!pass){msgEl.innerHTML='<span class="error">Enter username & password</span>';return}var name=rawName.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,'');msgEl.innerHTML='<span class="success">Checking...</span>';if(!db){msgEl.innerHTML='<span class="error">DB error</span>';return}db.ref('users/'+name).once('value',function(sn){var data=sn.val();if(!data){msgEl.innerHTML='<span class="error">User not found</span>';return}if(data.password!==md5(pass)){msgEl.innerHTML='<span class="error">Wrong password</span>';return}if(data.email){var ek=emailToKey(data.email);db.ref('email_index/'+ek).once('value',function(is){if(!is.exists())db.ref('email_index/'+ek).set({uid:name})})}localStorage.setItem("user",name);myUid=name;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('profile');lockPaymentMethod(data.phone||'',data.network||'');initGameListeners();setupInboxNotif()})}catch(e){alert(e.message)}}
-
-function logout(){if(confirm('Logout?')){localStorage.removeItem('user');myUid=null;location.reload()}}
-
-function showPage(page){try{var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';if(page==='profile'){document.getElementById('profilePage').classList.add('active');if(btns[0])btns[0].classList.add('active');loadProfile()}else if(page==='wallet'){document.getElementById('walletPage').classList.add('active');if(btns[1])btns[1].classList.add('active');showBalance();listenMyDeposits();listenMyWithdrawals();loadReferralData()}else if(page==='chat'){document.getElementById('chatPage').classList.add('active');if(btns[2])btns[2].classList.add('active')}else if(page==='play'){document.getElementById('playPage').classList.add('active');if(btns[3])btns[3].classList.add('active');renderGrades()}else if(page==='inbox'){document.getElementById('inboxPage').classList.add('active');if(btns[4])btns[4].classList.add('active');loadInbox();document.getElementById('inboxNotifDot').style.display='none'}else if(page==='game'){document.getElementById('gamePage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none'}}catch(e){console.error('showPage error:',e)}}
-
-function showBalance(){try{if(!db)return;db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{};document.getElementById("balanceText").innerHTML="💵 MWK "+(d.coins||0).toLocaleString();document.getElementById("statPlayed").innerText=parseInt(d.gamesPlayed)||0;document.getElementById("statWon").innerText=parseInt(d.gamesWon)||0;document.getElementById("statLost").innerText=parseInt(d.gamesLost)||0})}catch(e){}}
-function loadReferralData(){if(!db||!myUid)return;var bu=window.location.href.split('?')[0];document.getElementById('refLinkInput').value=bu+'?ref='+myUid;db.ref('referrals/'+myUid).once('value',function(s){var c=s.numChildren();document.getElementById('refCount').innerText=c;db.ref('leaderboard_all/'+myUid+'/referralClaimed').once('value',function(cs){var cl=cs.val()||0,uc=Math.floor(c/5)-cl,cb=document.getElementById('claimRefBtn');if(uc>0){cb.style.display='block';cb.innerText='🎉 Claim MWK '+(uc*10)}else cb.style.display='none'})})}
-function copyRefLink(){var ct=document.getElementById("refLinkInput");if(navigator.clipboard)navigator.clipboard.writeText(ct.value);else{ct.select();document.execCommand("copy")}alert("Copied!")}
-function claimReferralBonus(){if(!db||!myUid)return;db.ref('referrals/'+myUid).once('value',function(s){var c=s.numChildren();db.ref('leaderboard_all/'+myUid).once('value',function(us){var ud=us.val()||{},cl=ud.referralClaimed||0,uc=Math.floor(c/5)-cl;if(uc>0){db.ref('leaderboard_all/'+myUid).update({coins:(ud.coins||0)+(uc*10),referralClaimed:cl+uc},function(e){if(!e){alert('🎉 Claimed MWK '+(uc*10)+'!');showBalance();loadReferralData()}})}})})}
-
-function renderGrades(){var g=document.getElementById('gradeGrid'),h='';PVP_GRADES.forEach(function(gr){h+='<div class="grade-card" onclick="joinPvP('+gr.id+')"><div class="grade-icon">'+gr.icon+'</div><h3 style="color:#fff;font-size:16px">'+gr.name+'</h3><div class="grade-entry">Pay: MWK '+gr.entryMWK+'</div><div class="grade-prize">Win: MWK '+gr.winMWK+'</div></div>'});g.innerHTML=h;showBalance()}
-
-/* ===== FIX: Only deduct stake when match is found ===== */
-function joinPvP(gid){if(!db||!myUid){alert('Login first');return}var gr=PVP_GRADES.find(function(g){return g.id===gid});if(!gr)return;db.ref('leaderboard_all/'+myUid+'/coins').once('value',function(s){var b=s.val()||0;if(b<gr.entryMWK){alert('Not enough balance! Need MWK '+gr.entryMWK);return}document.getElementById('searchGradeText').innerText=gr.name+' - MWK '+gr.entryMWK;document.getElementById('searchingOverlay').style.display='flex';db.ref('pvp_queue/'+gid+'/'+myUid).set({timestamp:Date.now(),entryMWK:gr.entryMWK})})}
-
-if(db){db.ref('pvp_queue').on('value',function(s){if(!myUid)return;s.forEach(function(gs){var gid=gs.key,pl=[];gs.forEach(function(ps){pl.push(ps.key)});if(pl.length>=2&&(pl.indexOf(myUid)>=0)){var sorted=pl.slice().sort();var p1=sorted[0],p2=sorted[1];var gameId='game_'+gid+'_'+p1+'_'+p2+'_'+Date.now();var gd=PVP_GRADES.find(function(g){return g.id===parseInt(gid)});var entryMWK=gd.entryMWK;if(myUid!==p1)return;db.ref('pvp_queue/'+gid+'/'+p1).remove();db.ref('pvp_queue/'+gid+'/'+p2).remove();db.ref('leaderboard_all/'+p1+'/coins').once('value',function(s1){var b1=s1.val()||0;if(b1<entryMWK){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.now(),entryMWK:entryMWK});if(myUid===p1){alert('❌ Not enough balance! Match cancelled.');document.getElementById('searchingOverlay').style.display='none'}return}db.ref('leaderboard_all/'+p1).update({coins:b1-entryMWK},function(e1){if(e1){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2+'/coins').once('value',function(s2){var b2=s2.val()||0;if(b2<entryMWK){db.ref('leaderboard_all/'+p1+'/coins').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({coins:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2).update({coins:b2-entryMWK},function(e2){if(e2){db.ref('leaderboard_all/'+p1+'/coins').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({coins:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.now(),entryMWK:entryMWK});return}var ib=[];for(var r=0;r<8;r++){for(var c=0;c<8;c++){ib.push((r+c)%2&&r<3?-1:(r+c)%2&&r>4?1:0)}}db.ref('pvp_games/'+gameId).transaction(function(data){if(data===null||(data&&data.status==='finished')){return{p1:p1,p2:p2,gradeId:gid,winMWK:gd.winMWK,entryMWK:entryMWK,board:ib,turn:1,status:'playing',winner:null,created:Date.now(),drawCounter:0,drawTargetPlayer:0}}return data})})})})})}})})}
-
-var gameListenersSetup=false;
-function initGameListeners(){if(!db||!myUid||gameListenersSetup)return;gameListenersSetup=true;db.ref('pvp_games').orderByChild('p1').equalTo(myUid).on('value',handleGameUpdate);db.ref('pvp_games').orderByChild('p2').equalTo(myUid).on('value',handleGameUpdate)}
-function handleGameUpdate(s){if(!myUid)return;s.forEach(function(c){var g=c.val();if(!g)return;if(g.p1!==myUid&&g.p2!==myUid)return;if(g.status==='playing'){if(currentGameId!==c.key){currentGameId=c.key;myPlayerNumber=g.p1===myUid?1:2;document.getElementById('searchingOverlay').style.display='none';showPage('game');startGameListener(c.key)}}else if(g.status==='finished'&&currentGameId===c.key){endPvPGame(g)}})}
-function startGameListener(gid){if(gameListener)db.ref('pvp_games/'+gameListener).off();gameListener=gid;db.ref('pvp_games/'+gid).on('value',function(s){var g=s.val();if(!g)return;gameState=g;renderPvPBoard();if(g.status==='finished'&&currentGameId===gid){endPvPGame(g)}})}
-
-function renderPvPBoard(){var be=document.getElementById('checkersBoard'),h='';document.getElementById('p1Name').innerText='🔴 '+(gameState.p1===myUid?'You':gameState.p1);document.getElementById('p2Name').innerText='⚫ '+(gameState.p2===myUid?'You':gameState.p2);document.getElementById('gameStake').innerText=gameState.entryMWK+' MWK';document.getElementById('gamePrize').innerText=gameState.winMWK+' MWK';var imt=gameState.turn===myPlayerNumber;var isMultiJump=imt&&gameState.selected&&gameState.validMoves&&gameState.validMoves.length>0;document.getElementById('turnIndicator').innerText=isMultiJump?'⚡ Must Jump!':(imt?'🎯 Your Turn!':'⏳ Opponent');document.getElementById('turnIndicator').style.color=isMultiJump?'#ffd700':(imt?'#51cf66':'#ff6b6b');var db2=document.getElementById('drawCounterBar'),dt=gameState.drawTargetPlayer||0,dc=gameState.drawCounter||0;if(dt>0&&dc>0){db2.style.display='block';db2.innerText='⏱️ Draw in '+(12-dc)+' moves'}else db2.style.display='none';var b=gameState.board.slice();var sel=gameState.selected||null,vm=gameState.validMoves||[];for(var i=0;i<64;i++){var displayR=Math.floor(i/8),displayC=i%8;var boardR=myPlayerNumber===2?7-displayR:displayR;var boardC=myPlayerNumber===2?7-displayC:displayC;var boardIdx=boardR*8+boardC;var isDark=(displayR+displayC)%2===1;var p=b[boardIdx];var sc=sel&&sel[0]===boardR&&sel[1]===boardC?'selected':'';var mc=vm.some(function(m){return m[0]===boardR&&m[1]===boardC})?'valid-move':'';h+='<div class="square '+(isDark?'dark':'light')+' '+sc+' '+mc+'" onclick="clickPvPSquare('+displayR+','+displayC+')">';if(p!==0)h+='<div class="piece '+(p>0?'p1':'p2')+' '+(Math.abs(p)===2?'king':'')+'"></div>';h+='</div>'}be.innerHTML=h}
-
-function clickPvPSquare(r,c){if(gameState.turn!==myPlayerNumber)return;if(!db||!currentGameId)return;if(myPlayerNumber===2){r=7-r;c=7-c}var b=gameState.board,cv=b[r*8+c],sel=gameState.selected,vm=gameState.validMoves||[];if(sel&&vm.some(function(m){return m[0]===r&&m[1]===c})){makePvPMove(sel[0],sel[1],r,c);return}if((myPlayerNumber===1&&cv>0)||(myPlayerNumber===2&&cv<0)){var pl=myPlayerNumber;var allMoves=getAllCaptures(b,pl);var mustCapture=allMoves.length>0;var pieceMoves=getValidMovesForPiece(b,r,c,pl);var filteredMoves=[];for(var i=0;i<pieceMoves.length;i++){if(mustCapture&&pieceMoves[i].captured.length===0)continue;filteredMoves.push(pieceMoves[i].to)}if(filteredMoves.length>0)db.ref('pvp_games/'+currentGameId).update({selected:[r,c],validMoves:filteredMoves});else db.ref('pvp_games/'+currentGameId).update({selected:null,validMoves:[]})}else{db.ref('pvp_games/'+currentGameId).update({selected:null,validMoves:[]})}}
-
-function getCapturesForPiece(b,r,c,pl){var s=pl===1?1:-1;var p=b[r*8+c];if(Math.sign(p)!==s)return[];var caps=[],isKing=Math.abs(p)===2,dirs=[-1,1],dcs=[-1,1];for(var d=0;d<dirs.length;d++){for(var dc=0;dc<2;dc++){if(isKing){var dist=1,enm=null;while(true){var nr=r+dist*dirs[d],nc=c+dist*dcs[dc];if(nr<0||nr>=8||nc<0||nc>=8)break;if(b[nr*8+nc]!==0){if(Math.sign(b[nr*8+nc])===(-s)&&!enm)enm=[nr,nc];else break}else if(enm){caps.push({from:[r,c],to:[nr,nc],captured:enm})}dist++}}else{var mr=r+dirs[d],mc=c+dcs[dc],jr=r+2*dirs[d],jc=c+2*dcs[dc];if(jr>=0&&jr<8&&jc>=0&&jc<8&&b[mr*8+mc]!==0&&Math.sign(b[mr*8+mc])===(-s)&&b[jr*8+jc]===0){caps.push({from:[r,c],to:[jr,jc],captured:[[mr,mc]]})}}}}return caps}
-function getAllCaptures(b,pl){var s=pl===1?1:-1;var caps=[];for(var r=0;r<8;r++){for(var c=0;c<8;c++){if(Math.sign(b[r*8+c])===s){var pc=getCapturesForPiece(b,r,c,pl);for(var i=0;i<pc.length;i++)caps.push(pc[i])}}}return caps}
-function getSimpleMovesForPiece(b,r,c,pl){var s=pl===1?1:-1;var p=b[r*8+c];if(Math.sign(p)!==s)return[];var mvs=[],isKing=Math.abs(p)===2,dirs=isKing?[-1,1]:(pl===1?[-1]:[1]),dcs=[-1,1];for(var d=0;d<dirs.length;d++){for(var dc=0;dc<2;dc++){if(isKing){var dist=1;while(true){var nr=r+dist*dirs[d],nc=c+dist*dcs[dc];if(nr<0||nr>=8||nc<0||nc>=8)break;if(b[nr*8+nc]!==0)break;mvs.push({from:[r,c],to:[nr,nc],captured:[]});dist++}}else{var nr=r+dirs[d],nc=c+dcs[dc];if(nr>=0&&nr<8&&nc>=0&&nc<8&&b[nr*8+nc]===0)mvs.push({from:[r,c],to:[nr,nc],captured:[]})}}}return mvs}
-function getValidMovesForPiece(b,r,c,pl){if(getAllCaptures(b,pl).length>0)return getCapturesForPiece(b,r,c,pl);return getSimpleMovesForPiece(b,r,c,pl)}
-
-function makePvPMove(fR,fC,tR,tC){if(!gameState||!gameState.board||!currentGameId||!db)return;var b=gameState.board.slice();var p=b[fR*8+fC];var pl=(p>0)?1:2;if(pl!==myPlayerNumber)return;b[tR*8+tC]=p;b[fR*8+fC]=0;var wasCapture=Math.abs(tR-fR)>1;if(wasCapture){var dR=Math.sign(tR-fR),dC=Math.sign(tC-fC);if(Math.abs(p)===2){var ir=fR+dR,ic=fC+dC;while(ir!==tR||ic!==tC){if(b[ir*8+ic]!==0)b[ir*8+ic]=0;ir+=dR;ic+=dC}}else{b[(fR+dR)*8+(fC+dC)]=0}playSound('capture')}else{playSound('move')}var promoted=false;if(tR===0&&p===1){b[tR*8+tC]=2;promoted=true}if(tR===7&&p===-1){b[tR*8+tC]=-2;promoted=true}var u={board:b,selected:null,validMoves:[]};if(wasCapture&&!promoted){var nc=getCapturesForPiece(b,tR,tC,pl);if(nc.length>0){u.turn=pl;u.selected=[tR,tC];u.validMoves=nc.map(function(m){return m.to});db.ref('pvp_games/'+currentGameId).update(u);return}}var np=pl===1?2:1;u.turn=np;var p1c=0,p2c=0,p1k=0,p2k=0;for(var i=0;i<64;i++){if(b[i]>0){p1c++;if(b[i]===2)p1k++}if(b[i]<0){p2c++;if(b[i]===-2)p2k++}}var p1Id=gameState.p1;var p2Id=gameState.p2;if(p1c===0){u.status='finished';u.winner=p2Id}else if(p2c===0){u.status='finished';u.winner=p1Id}else{var nhm=false;for(var i=0;i<64;i++){var np2=b[i];if((np===1&&np2>0)||(np===2&&np2<0)){if(getValidMovesForPiece(b,Math.floor(i/8),i%8,np).length>0){nhm=true;break}}}if(!nhm){u.status='finished';u.winner=(pl===1?p1Id:p2Id)}}if(u.status!=='finished'){if(p1c===1&&p1k===1&&p2c===1&&p2k===1){u.status='finished';u.winner='draw'}}if(u.status!=='finished'){var lp=0;if(p1c===1&&p2c>=1)lp=1;if(p2c===1&&p1c>=1)lp=2;if(p1c===1&&p2c===1)lp=1;var cdt=gameState.drawTargetPlayer||0;var cdc=gameState.drawCounter||0;if(lp>0){if(cdt===0){u.drawTargetPlayer=lp;u.drawCounter=1}else if(cdt===lp){u.drawCounter=cdc+1;u.drawTargetPlayer=lp;if(u.drawCounter>=12){u.status='finished';u.winner='draw'}}else{u.drawTargetPlayer=lp;u.drawCounter=1}}else{u.drawTargetPlayer=0;u.drawCounter=0}}db.ref('pvp_games/'+currentGameId).update(u)}
-
-function endPvPGame(g){if(!currentGameId)return;if(processedGameEnds[currentGameId]){currentGameId=null;gameState={};gameListener=null;myPlayerNumber=0;showPage('profile');return}processedGameEnds[currentGameId]=true;var endedGameId=currentGameId;currentGameId=null;gameState={};if(gameListener){db.ref('pvp_games/'+gameListener).off()}gameListener=null;myPlayerNumber=0;var isDraw=g.winner==='draw';var isWin=!isDraw&&g.winner===myUid;if(isDraw)playSound('move');else if(isWin)playSound('win');else playSound('lose');db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{},u={};var opponent=g.p1===myUid?g.p2:g.p1;if(isDraw){u.coins=(d.coins||0)+(g.entryMWK||0);u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;u.winStreak=0;db.ref('match_history/'+myUid).push({opponent:opponent,result:'draw',amount:g.entryMWK,gradeId:g.gradeId,timestamp:Date.now()});db.ref('leaderboard_all/'+myUid).update(u,function(){alert('🤝 DRAW! MWK '+(g.entryMWK||0)+' refunded.');showPage('profile')})}else{u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;u.gamesWon=(parseInt(d.gamesWon)||0)+(isWin?1:0);u.gamesLost=(parseInt(d.gamesLost)||0)+(isWin?0:1);u.winStreak=isWin?((d.winStreak||0)+1):0;if(isWin)u.coins=(d.coins||0)+(g.winMWK||0);db.ref('match_history/'+myUid).push({opponent:opponent,result:isWin?'win':'loss',amount:isWin?g.winMWK:g.entryMWK,gradeId:g.gradeId,timestamp:Date.now()});db.ref('leaderboard_all/'+myUid).update(u,function(){alert(isWin?'🎉 YOU WIN! +MWK '+(g.winMWK||0):'😞 You Lost! MWK '+(g.entryMWK||0));showPage('profile')})}});var now=Date.now();processedGameEnds[endedGameId]=now;Object.keys(processedGameEnds).forEach(function(k){if(typeof processedGameEnds[k]==='number'&&now-processedGameEnds[k]>300000){delete processedGameEnds[k]}});setTimeout(function(){if(db)db.ref('pvp_games/'+endedGameId).remove()},5000)}
-
-/* ===== FIX: Cancel just removes from queue, no refund needed ===== */
-function cancelMatchmaking(){if(db&&myUid){db.ref('pvp_queue').once('value',function(s){s.forEach(function(gs){if(gs.val()&&gs.val()[myUid]){var gid=gs.key;db.ref('pvp_queue/'+gid+'/'+myUid).remove()}})})}document.getElementById('searchingOverlay').style.display='none'}
-function exitGame(){if(confirm('Leave & FORFEIT?')){if(db&&currentGameId&&gameState){var winner=myPlayerNumber===1?gameState.p2:gameState.p1;db.ref('pvp_games/'+currentGameId).update({status:'finished',winner:winner})}}}
-
-function submitDepositRequest(){if(!db||!myUid)return;var a=parseInt(document.getElementById("depositAmountInput").value);var tx=(document.getElementById("depositTxIdInput").value||"").trim();var m=document.getElementById("depositMsg");if(!a||a<50){m.innerHTML='<span class="error">Minimum 50 MWK</span>';return}if(!tx||tx.length<4){m.innerHTML='<span class="error">Enter valid TxID</span>';return}m.innerHTML='<span class="success">Saving...</span>';db.ref('deposit_requests').push({uid:myUid,amountMWK:a,txId:tx,status:'pending',timestamp:Date.now()},function(e){if(e){m.innerHTML='<span class="error">Failed</span>'}else{alert("✅ Deposit Request Submitted!");document.getElementById("depositAmountInput").value='';document.getElementById("depositTxIdInput").value='';m.innerHTML='<span class="success">Opening Chat...</span>';showPage('inbox');var ii=document.getElementById('inboxMsgInput');if(ii){ii.value="I deposited MWK "+a+". TxID: "+tx+". Screenshot:";ii.focus()}}})}
-function submitWithdrawRequest(){if(!db||!myUid)return;var a=parseInt(document.getElementById("withdrawAmount").value);var m=document.getElementById("msg");m.innerHTML='<span class="success">Processing...</span>';db.ref('leaderboard_all/'+myUid+'/coins').once('value',function(s){var cb=s.val()||0;if(cb<a){m.innerHTML='<span class="error">Not enough balance!</span>';return}db.ref('leaderboard_all/'+myUid).update({coins:cb-a},function(e){if(e){m.innerHTML='<span class="error">Error</span>';return}db.ref('withdraw_requests').push({uid:myUid,amountMWK:a,status:'pending',timestamp:Date.now()},function(e2){if(e2){m.innerHTML='<span class="error">Failed</span>'}else{m.innerHTML='<span class="success">Requested!</span>';showBalance()}})})})}
-function listenMyDeposits(){if(!db||!myUid)return;db.ref('deposit_requests').orderByChild('uid').equalTo(myUid).on('value',function(s){var h='<h3 style="font-size:14px;color:#888;margin-bottom:8px">Deposit History</h3>';s.forEach(function(c){var r=c.val();h+='<div class="history-item"><div><span style="color:#fff">MWK '+r.amountMWK+'</span><br><span style="color:#555;font-size:10px">'+new Date(r.timestamp).toLocaleDateString()+' • '+(r.txId||'')+'</span></div><span class="history-status-'+r.status+'">'+r.status+'</span></div>'});document.getElementById('myDepositHistory').innerHTML=h})}
-function listenMyWithdrawals(){if(!db||!myUid)return;db.ref('withdraw_requests').orderByChild('uid').equalTo(myUid).on('value',function(s){var h='';if(!s.exists())h='<div style="text-align:center;color:#555;font-size:12px;padding:10px;">No withdrawals yet</div>';s.forEach(function(c){var r=c.val();var sh=r.status==='pending'?'<span class="history-status-pending">⏳ Pending</span>':r.status==='approved'?'<span class="history-status-approved">✅ Approved</span>':r.status==='declined'?'<span class="history-status-declined">❌ Declined</span>':'<span class="history-status-'+r.status+'">'+r.status+'</span>';h+='<div class="history-item"><div><span style="color:#fff">MWK '+r.amountMWK+'</span><br><span style="color:#555;font-size:10px">'+new Date(r.timestamp).toLocaleDateString()+'</span></div>'+sh+'</div>'});document.getElementById('myWithdrawHistory').innerHTML=h})}
-
-var inboxFileData=null,inboxFileName=null;var inboxMessagesCache={};
-function loadInbox(){if(!db||!myUid)return;db.ref('admin_inbox/'+myUid+'/messages').orderByChild('timestamp').on('value',function(s){var h='';inboxMessagesCache={};s.forEach(function(c){var m=c.val(),im=m.from==='user',ch='';inboxMessagesCache[c.key]=m;if(m.image)ch+='<img src="'+m.image+'" class="inbox-img" onclick="openImageViewer(this.src)">';if(m.image)ch+='<button onclick="saveInboxPhoto(\''+c.key+'\')" class="inbox-action-btn inbox-save-btn">💾 Save Photo</button>';if(m.fileData)ch+='<a href="'+m.fileData+'" download="'+(m.fileName||'file')+'" class="inbox-file">📎 '+(m.fileName||'File')+'</a>';if(m.text)ch+='<div style="color:#fff;font-size:14px;white-space:pre-wrap;">'+escapeHtml(m.text)+'</div>';h+='<div class="inbox-item" id="inbox-msg-'+c.key+'" style="'+(im?'text-align:right;background:#0a2a3a;':'text-align:left;background:#1a1a2e;')+'">';h+=ch;h+='<div class="inbox-meta"><span>'+(im?'You':'Admin')+'</span><span>'+new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';h+='<div class="inbox-actions-row"><button onclick="deleteInboxMsg(\''+c.key+'\')" class="inbox-action-btn inbox-delete-btn">🗑️ Delete</button></div>';h+='</div>'});document.getElementById('inboxMessages').innerHTML=h||'<div style="text-align:center;color:#555;padding:20px;">No messages yet</div>';document.getElementById('inboxMessages').scrollTop=99999})}
-function deleteInboxMsg(msgKey){if(!db||!myUid||!msgKey)return;if(!confirm('Delete this message?'))return;var msgEl=document.getElementById('inbox-msg-'+msgKey);if(msgEl)msgEl.classList.add('deleting');db.ref('admin_inbox/'+myUid+'/messages/'+msgKey).remove(function(err){if(err){alert('Failed to delete message.');if(msgEl)msgEl.classList.remove('deleting')}})}
-function saveInboxPhoto(msgKey){var msg=inboxMessagesCache[msgKey];if(!msg||!msg.image){alert('No photo found to save.');return}try{var a=document.createElement('a');a.href=msg.image;a.download='inbox_photo_'+Date.now()+'.jpg';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500)}catch(e){openImageViewer(msg.image);alert('Tap 💾 Save in the viewer to download the photo.')}}
-window.handleInboxFileUpload=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var im=f.type.startsWith('image/'),r=new FileReader();r.onload=function(ev){if(im){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=600,h=600,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);inboxFileData=c.toDataURL('image/jpeg',0.5);inboxFileName=f.name;document.getElementById('inboxFilePreview').style.display='block';document.getElementById('inboxFileName').innerText='📷 '+f.name};img.src=ev.target.result}else{if(f.size>1048576){alert("Max 1MB.");e.target.value='';return}inboxFileData=ev.target.result;inboxFileName=f.name;document.getElementById('inboxFilePreview').style.display='block';document.getElementById('inboxFileName').innerText='📎 '+f.name}};r.readAsDataURL(f)};
-window.clearInboxFile=function(){inboxFileData=null;inboxFileName=null;document.getElementById('inboxFilePreview').style.display='none';document.getElementById('inboxFileInput').value=''};
-window.sendInboxMsg=function(){if(!db||!myUid)return;var i=document.getElementById('inboxMsgInput');var t=(i.value||'').trim();if(!t&&!inboxFileData)return;var md={from:'user',text:t,timestamp:Date.now()};if(inboxFileData){if(inboxFileData.includes('image/'))md.image=inboxFileData;else{md.fileData=inboxFileData;md.fileName=inboxFileName}}db.ref('admin_inbox/'+myUid+'/messages').push(md,function(e){if(!e){i.value='';window.clearInboxFile()}})};
-function setupInboxNotif(){if(!db||!myUid)return;db.ref('admin_inbox/'+myUid+'/messages').orderByChild('timestamp').limitToLast(1).on('value',function(s){s.forEach(function(c){if(c.val().from==='admin'){var ip=document.getElementById('inboxPage');if(ip&&!ip.classList.contains('active')){var d=document.getElementById('inboxNotifDot');if(d)d.style.display='inline-block'}}})})}
-
-document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){var sp=document.getElementById('splashScreen');if(sp){sp.classList.add('splash-hide');setTimeout(function(){sp.style.display='none'},700)}},2500);var lsb=document.getElementById("loginSubmitBtn");if(lsb)lsb.addEventListener('click',function(e){e.preventDefault();login()});var lui=document.getElementById("loginUsernameInput");if(lui)lui.addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();login()}});var lb=document.getElementById("loginBtn");if(lb)lb.addEventListener('click',function(e){e.preventDefault();register()});var ui=document.getElementById("usernameInput");if(ui){ui.addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();register()}});setTimeout(function(){ui.focus();generateCaptcha()},300)}var pi=document.getElementById("phoneInput");if(pi)pi.addEventListener('input',function(e){this.value=this.value.replace(/[^0-9]/g,'')});var el;el=document.getElementById("navProfile");if(el)el.onclick=function(){showPage('profile')};el=document.getElementById("navWallet");if(el)el.onclick=function(){showPage('wallet')};el=document.getElementById("navPlay");if(el)el.onclick=function(){showPage('play')};el=document.getElementById("navInbox");if(el)el.onclick=function(){showPage('inbox')};try{var u=localStorage.getItem("user");if(u){myUid=u;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";document.getElementById('waFloatBtn').style.display='flex';showPage('profile');if(db)lockPaymentMethod(localStorage.getItem("userPhone")||'',localStorage.getItem("network")||'');initGameListeners();setupInboxNotif()}}catch(e){}});
-</script>
-
-<!-- ===== CHAT & VOICE SYSTEM ===== -->
-<script>
-(function(){var chatCurrentWith=null;var chatListenerRef=null;var replyToMsg=null;var chatUsersCache=[];var chatMessagesData=[];var chatOnlineListeners=[];var mediaRecorder=null;var audioChunks=[];var isRecording=false;var recordingTimer=null;var recordingSeconds=0;function setOnlineStatus(online){if(!db||!myUid)return;var ref=db.ref('online_status/'+myUid);if(online){ref.set({online:true,lastSeen:Date.now()});ref.onDisconnect().set({online:false,lastSeen:Date.now()})}else{ref.set({online:false,lastSeen:Date.now()})}}function getChatId(uid1,uid2){return uid1<uid2?uid1+'_'+uid2:uid2+'_'+uid1}function escapeHtml(text){var d=document.createElement('div');d.textContent=text;return d.innerHTML}function showChatPage(){var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatPage').classList.add('active');var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');if(btns[2])btns[2].classList.add('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';loadChatUsers()}function loadChatUsers(){if(!db||!myUid)return;db.ref('leaderboard_all').once('value',function(snap){chatUsersCache=[];snap.forEach(function(child){if(child.key!==myUid)chatUsersCache.push({uid:child.key,displayName:(child.val()||{}).displayName||child.key})});renderChatUsers(chatUsersCache);listenAllOnlineStatus();loadAllLastMessages();loadAllUnreadCounts()})}function listenAllOnlineStatus(){chatOnlineListeners.forEach(function(r){r.off()});chatOnlineListeners=[];chatUsersCache.forEach(function(u){var ref=db.ref('online_status/'+u.uid);ref.on('value',function(sSnap){var dotEl=document.getElementById('cdot_'+u.uid);var sd=sSnap.val();if(dotEl){if(sd&&sd.online)dotEl.classList.add('on');else dotEl.classList.remove('on')}});chatOnlineListeners.push(ref)})}function loadAllLastMessages(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').limitToLast(1).once('value',function(snap){snap.forEach(function(child){var msg=child.val();var el=document.getElementById('lastmsg_'+u.uid);if(el)el.innerText=(msg.from===myUid?'You: ':'')+(msg.image?'📷':(msg.audio?'🎤':(msg.text||'')))})})})}function loadAllUnreadCounts(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('read').equalTo(false).once('value',function(snap){var count=0;snap.forEach(function(c){if(c.val().from!==myUid)count++});var badge=document.getElementById('unread_'+u.uid);if(badge){if(count>0){badge.style.display='flex';badge.innerText=count}else badge.style.display='none'}})})}function renderChatUsers(users){var el=document.getElementById('chatUserList');if(!el)return;if(!users.length){el.innerHTML='<div style="padding:30px;color:#555">No users yet</div>';return}var html='';users.forEach(function(u){html+='<div class="chat-user-row" onclick="window._openChatWith(\''+u.uid+'\',\''+u.displayName+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid #1a1a1a">';html+='<div class="chat-avatar">'+escapeHtml(u.displayName[0])+'<span id="cdot_'+u.uid+'" class="chat-online-dot"></span></div>';html+='<div style="flex:1;text-align:left;min-width:0"><div style="font-weight:bold;color:#fff;font-size:14px">'+escapeHtml(u.displayName)+'</div><div id="lastmsg_'+u.uid+'" style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tap to chat</div></div>';html+='<div id="unread_'+u.uid+'" class="chat-unread-badge">0</div>';html+='</div>'});el.innerHTML=html}window.filterChatUsers=function(){var q=(document.getElementById('chatSearchInput').value||'').toLowerCase();renderChatUsers(chatUsersCache.filter(function(u){return u.displayName.toLowerCase().indexOf(q)>=0}));listenAllOnlineStatus()};window._openChatWith=function(uid,displayName){chatCurrentWith=uid;document.getElementById('chatConvName').innerText=displayName;document.getElementById('chatConvAvatar').innerText=displayName[0];cancelReply();var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatConvPage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none';listenForChatMessages(uid)};window.backToChatList=function(){if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatCurrentWith=null;showChatPage()};function listenForChatMessages(uid){var chatId=getChatId(myUid,uid);if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatListenerRef=chatId;db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').on('value',function(snap){chatMessagesData=[];snap.forEach(function(c){var m=c.val();m._id=c.key;chatMessagesData.push(m)});renderChatMessages(chatMessagesData);markChatAsRead
-(chatId,chatMessagesData)})}function renderChatMessages(messages){var container=document.getElementById('chatMessages');if(!container)return;var html='';var prevDate='';var me=String(myUid||'').trim();for(var idx=0;idx<messages.length;idx++){var msg=messages[idx];var fromId=String(msg.from||'').trim();var isMine=fromId===me;var dateStr=new Date(msg.timestamp).toLocaleDateString();if(dateStr!==prevDate){html+='<div style="text-align:center;margin:14px 0;font-size:11px;color:#999"><span style="background:#222;padding:3px 14px;border-radius:10px;display:inline-block">'+dateStr+'</span></div>';prevDate=dateStr}var tickHtml=isMine?(msg.read?' <span style="color:#00ffcc">✓✓</span>':' <span style="color:#777">✓✓</span>'):'';var replyHtml='';if(msg.replyTo){replyHtml='<div style="background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:5px;border-left:3px solid #00ffcc;margin-bottom:6px;font-size:11px;color:#ccc">'+escapeHtml(msg.replyTo.text||'📷')+'</div>'}var imageHtml='';if(msg.image){imageHtml='<img src="'+msg.image+'" style="max-width:220px;max-height:220px;border-radius:10px;margin-bottom:6px;display:block;cursor:pointer;border:2px solid #333" onclick="openImageViewer(this.src)">'}var audioHtml='';if(msg.audio){audioHtml='<audio controls preload="none" style="width:200px;height:36px;margin-top:5px" src="'+msg.audio+'"></audio>'}var rowStyle='display:flex!important;visibility:visible!important;opacity:1!important;margin:8px 0;align-items:flex-end;gap:6px;width:100%;padding:0 6px;box-sizing:border-box;'+(isMine?'justify-content:flex-end;':'justify-content:flex-start;');var bubbleStyle='padding:10px 14px;max-width:78%;min-width:60px;min-height:28px;word-wrap:break-word;border-radius:16px;box-sizing:border-box;'+(isMine?'background-color:#005c4b;background:linear-gradient(135deg,#005c4b,#00786a);border:1px solid #00ffcc;color:#fff;border-bottom-right-radius:4px;':'background-color:#2a2f45;background:linear-gradient(135deg,#2a2f45,#32395e);border:1px solid #4a5568;color:#fff;border-bottom-left-radius:4px;');var senderLabel=isMine?'<div style="font-size:10px;color:#7fffd4;margin-bottom:3px;font-weight:bold">You</div>':'<div style="font-size:10px;color:#a0b4ff;margin-bottom:3px;font-weight:bold">'+escapeHtml((msg.from||'User').substring(0,12))+'</div>';html+='<div style="'+rowStyle+'">';if(!isMine)html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<div style="'+bubbleStyle+'">';html+=senderLabel;html+=replyHtml;html+=imageHtml;html+=audioHtml;if(msg.text)html+='<div style="color:#ffffff!important;font-size:14px;white-space:pre-wrap;line-height:1.4">'+escapeHtml(msg.text)+'</div>';html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:5px;text-align:right">'+new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+tickHtml+'</div>';html+='</div>';if(isMine){html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.6;color:#ff7b7b" onclick="window._deleteMsg(\''+msg._id+'\')" title="Delete">🗑</button>'}html+='</div>'}container.innerHTML=html;container.scrollTop=container.scrollHeight}function markChatAsRead(chatId,msgs){if(!db)return;msgs.forEach(function(m){if(m.from!==myUid&&!m.read)db.ref('chats/'+chatId+'/messages/'+m._id).update({read:true})})}window.sendChatMsg=function(){if(!db||!chatCurrentWith||!myUid){alert('Chat not ready.');return}var input=document.getElementById('chatMsgInput');var text=(input.value||'').trim();if(!text)return;var msgData={from:myUid,text:text,timestamp:Date.now(),read:false};if(replyToMsg){msgData.replyTo={id:replyToMsg.id,text:replyToMsg.text};cancelReply()}var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push(msgData,function(err){if(err)alert('Message failed: '+err.message);else input.value=''})};window._setReplyByIndex=function(idx){var msg=chatMessagesData[idx];if(!msg)return;replyToMsg={id:msg._id,text:msg.text||(msg.image?'📷':(msg.audio?'🎤':''))};document.getElementById('replyPreview').style.display='block';document.getElementById('replyPreviewText').innerText=replyToMsg.text;document.getElementById('chatMsgInput').focus()};function cancelReply(){replyToMsg=null;document.getElementById('replyPreview').style.display='none'}window.cancelReply=cancelReply;window.handleChatFileUpload=function(e){var file=e.target.files&&e.target.files[0];if(!file||!db||!chatCurrentWith||!myUid)return;var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=600,h=600,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);var imageData=c.toDataURL('image/jpeg',0.5);var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push({from:myUid,text:'',image:imageData,timestamp:Date.now(),read:false},function(err){if(err)alert('Image send failed: '+err.message)})};img.src=ev.target.result};reader.readAsDataURL(file);e.target.value=''};window._deleteMsg=function(msgId){if(!chatListenerRef||!db)return;if(confirm('Delete?'))db.ref('chats/'+chatListenerRef+'/messages/'+msgId).remove()};window.clearChat=function(){if(!chatCurrentWith||!db)return;if(confirm('Delete ALL messages?'))db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').remove()};window.toggleVoiceNote=function(){if(isRecording)stopVoiceRecording();else startVoiceRecording()};function startVoiceRecording(){navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=function(e){audioChunks.push(e.data)};mediaRecorder.onstop=function(){stream.getTracks().forEach(function(t){t.stop()});var blob=new Blob(audioChunks,{type:'audio/webm'});var reader=new FileReader();reader.onload=function(){db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').push({from:myUid,text:'',audio:reader.result,timestamp:Date.now(),read:false})};reader.readAsDataURL(blob)};mediaRecorder.start();isRecording=true;document.getElementById('voiceNoteBtn').style.background='#ff6b6b';document.getElementById('voiceNoteBtn').innerText='⏹';document.getElementById('recordingStatus').style.display='block';recordingTimer=setInterval(function(){recordingSeconds++;if(recordingSeconds>=60)stopVoiceRecording()},1000)}).catch(function(){alert('Microphone access denied.')})}function stopVoiceRecording(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();isRecording=false;clearInterval(recordingTimer);recordingSeconds=0;document.getElementById('voiceNoteBtn').style.background='#1a1a1a';document.getElementById('voiceNoteBtn').innerText='🎤';document.getElementById('recordingStatus').style.display='none'}if(document.getElementById('navChat'))document.getElementById('navChat').addEventListener('click',function(e){e.preventDefault();showChatPage()});function initChatOnline(){if(myUid&&db){setOnlineStatus(true);setInterval(function(){if(myUid&&db)setOnlineStatus(true)},30000)}}window.addEventListener('beforeunload',function(){setOnlineStatus(false)});setTimeout(function(){if(myUid&&db)initChatOnline()},500);var _lastUid=null;setInterval(function(){if(myUid!==_lastUid){_lastUid=myUid;if(myUid&&db)initChatOnline()}},500)})();
-</script>
-
-<!-- ===== BULLETPROOF APP INSTALL GATE DETECTION ===== -->
-<script>
-(function() {
-  var gateDismissed = false;
-  var gateShown = false;
-  var checkCount = 0;
-  var MAX_CHECKS = 40;
-
-  function hideAppGate() {
-    gateDismissed = true;
-    gateShown = false;
-    var gate = document.getElementById('appInstallGate');
-    if (gate) gate.style.display = 'none';
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    if (user.email === ADMIN_EMAIL) {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      initAdmin();
+    } else {
+      auth.signOut();
+      document.getElementById("loginError").innerText = "Access Denied. Not an admin account.";
+    }
+  } else {
+    document.getElementById("loginScreen").classList.remove("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
   }
+});
 
-  function showAppGate() {
-    if (gateDismissed) return;
-    gateShown = true;
-    var gate = document.getElementById('appInstallGate');
-    if (gate) gate.style.display = 'flex';
+/* ===== TABS ===== */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('depositsTab').classList.add('hidden');
+  document.getElementById('withdrawalsTab').classList.add('hidden');
+  document.getElementById('pvpTab').classList.add('hidden');
+  document.getElementById('chatTab').classList.add('hidden');
+  document.getElementById('vpnTab').classList.add('hidden');
+  if (btn) btn.classList.add('active');
+  var map = { deposits:'depositsTab', withdrawals:'withdrawalsTab', pvp:'pvpTab', chat:'chatTab', vpn:'vpnTab' };
+  if (map[tab]) document.getElementById(map[tab]).classList.remove('hidden');
+}
+
+/* ===== GET MERGED USER DATA ===== */
+function getUserData(uid) {
+  var lb = cachedLeaderboard[uid] || {};
+  var us = cachedUsersNode[uid] || {};
+  return {
+    username: uid,
+    displayName: lb.displayName || uid,
+    phone: lb.phone || us.phone || 'N/A',
+    network: lb.network || us.network || 'N/A',
+    email: us.email || 'N/A',
+    mwk: lb.mwk || 0,
+    mwkUsers: us.mwk || 0,
+    gamesPlayed: lb.gamesPlayed || 0,
+    gamesWon: lb.gamesWon || 0,
+    gamesLost: lb.gamesLost || 0,
+    winStreak: lb.winStreak || 0,
+    score: lb.score || 0,
+    banned: lb.banned || false,
+    referralClaimed: lb.referralClaimed || 0,
+    lastPlayed: lb.lastPlayed || 0,
+    created: us.created || 0,
+    profilePic: lb.profilePic || null,
+    hasEmail: !!(us.email),
+    hasPhone: !!(lb.phone || us.phone),
+    password: us.password || null
+  };
+}
+
+/* ===== DEPOSITS ===== */
+function loadDeposits() {
+  db.ref('deposit_requests').on('value', function(snap) {
+    lastDepositSnap = snap;
+    renderDeposits();
+  });
+}
+function renderDeposits() {
+  if (!lastDepositSnap) return;
+  var snap = lastDepositSnap;
+  var tbody = document.getElementById("depositBody");
+  tbody.innerHTML = "";
+  var pending = 0;
+  snap.forEach(function(child) {
+    var id = child.key, d = child.val();
+    var status = d.status || "pending";
+    if (status === 'pending') pending++;
+    var statusClass = status === 'approved' ? 'status-approved' : status === 'declined' ? 'status-declined' : 'status-pending';
+    var pts = d.amountMWK || 0;
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:700;color:#fff">' + esc(d.uid) + '</td>' +
+      '<td style="color:#ffd700;font-weight:700">' + pts + ' Pts</td>' +
+      '<td style="color:#00ffcc;font-family:monospace;font-size:12px">' + esc(d.txId || 'N/A') + '</td>' +
+      '<td style="color:#555;font-size:11px">' + new Date(d.timestamp).toLocaleString() + '</td>' +
+      '<td><span class="status ' + statusClass + '">' + status + '</span></td>' +
+      '<td>' + (status === 'pending' ?
+        '<button class="btn btn-approve" onclick="approveDeposit(\'' + id + '\',\'' + d.uid + '\',' + pts + ')">Approve</button>' +
+        '<button class="btn btn-reject" onclick="declineDeposit(\'' + id + '\')">Decline</button>' : '-') + '</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('pendingDeposits').innerText = pending;
+}
+
+function approveDeposit(id, uid, pts) {
+  if (!confirm('Add ' + pts + ' Points to ' + uid + '?')) return;
+  db.ref('leaderboard_all/' + uid + '/mwk').transaction(function(cur) { return (cur || 0) + pts; });
+  db.ref('users/' + uid + '/mwk').transaction(function(cur) { return (cur || 0) + pts; });
+  db.ref('deposit_requests/' + id).update({ status: 'approved' });
+  showToast('Approved! ' + pts + ' Points added to ' + uid, 'success');
+}
+
+function declineDeposit(id) {
+  if (!confirm('Decline this deposit?')) return;
+  db.ref('deposit_requests/' + id).update({ status: 'declined' });
+  showToast('Deposit declined.', 'error');
+}
+
+/* ===== WITHDRAWALS (BUNDLES) ===== */
+function loadWithdrawals() {
+  db.ref('withdraw_requests').on('value', function(snap) {
+    lastWithdrawalSnap = snap;
+    renderWithdrawals();
+  });
+}
+function renderWithdrawals() {
+  if (!lastWithdrawalSnap) return;
+  var snap = lastWithdrawalSnap;
+  var tbody = document.getElementById("withdrawalBody");
+  tbody.innerHTML = "";
+  var pending = 0;
+  snap.forEach(function(child) {
+    var id = child.key, w = child.val();
+    var status = w.status || "pending";
+    if (status === 'pending') pending++;
+    var statusClass = status === 'approved' ? 'status-approved' : status === 'declined' ? 'status-declined' : 'status-pending';
+    var ud = getUserData(w.uid);
+    var pts = w.amountMWK || 0;
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:700;color:#fff">' + esc(w.uid) + '</td>' +
+      '<td style="color:#ffd700;font-weight:700">' + pts + ' Pts</td>' +
+      '<td style="color:#00ffcc">' + esc(ud.phone) + '</td>' +
+      '<td>' + esc(ud.network) + '</td>' +
+      '<td style="color:#555;font-size:11px">' + new Date(w.timestamp).toLocaleString() + '</td>' +
+      '<td><span class="status ' + statusClass + '">' + status + '</span></td>' +
+      '<td>' + (status === 'pending' ?
+        '<button class="btn btn-approve" onclick="approveWithdrawal(\'' + id + '\',\'' + w.uid + '\',' + pts + ')">Approve</button>' +
+        '<button class="btn btn-reject" onclick="rejectWithdrawal(\'' + id + '\',\'' + w.uid + '\',' + pts + ')">Reject</button>' +
+        '<button class="btn btn-detail" onclick="openUserEdit(\'' + w.uid + '\')" title="View user details">View</button>' : '-') + '</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('pendingCount').innerText = pending;
+}
+
+function approveWithdrawal(id, uid, pts) {
+  if (!confirm('Approve Bundle for ' + uid + '? Make sure you sent the data via ' + getUserData(uid).network + '!')) return;
+  db.ref('withdraw_requests/' + id).update({ status: 'approved' });
+  showToast('Bundle marked as Sent!', 'success');
+}
+
+function rejectWithdrawal(id, uid, pts) {
+  if (!confirm('Reject and refund ' + pts + ' Points to ' + uid + '?')) return;
+  db.ref('leaderboard_all/' + uid + '/mwk').transaction(function(cur) { return (cur || 0) + pts; });
+  db.ref('users/' + uid + '/mwk').transaction(function(cur) { return (cur || 0) + pts; });
+  db.ref('withdraw_requests/' + id).update({ status: 'declined' });
+  showToast('Rejected. ' + pts + ' Points refunded to ' + uid, 'error');
+}
+
+/* ===== PVP MATCHES ===== */
+function loadPvPGames() {
+  db.ref('pvp_games').on('value', function(snap) {
+    var tbody = document.getElementById("pvpBody");
+    tbody.innerHTML = "";
+    var active = 0;
+    var games = [];
+    snap.forEach(function(c) { games.push({ id: c.key, val: c.val() }); });
+    games.sort(function(a, b) { return (b.val.created || 0) - (a.val.created || 0); });
+    games.forEach(function(g) {
+      var d = g.val;
+      if (d.status === 'playing') active++;
+      var statusClass = d.status === 'playing' ? 'status-playing' : (d.winner === 'draw' ? 'status-draw' : 'status-finished');
+      var shortId = g.id.substring(g.id.length - 8);
+      var winnerText = '-';
+      if (d.winner === 'draw') winnerText = 'Draw/Refund';
+      else if (d.winner) winnerText = d.winner === d.p1 ? 'P1' : 'P2';
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td style="font-family:monospace;color:#555;font-size:11px">' + shortId + '</td>' +
+        '<td style="color:#ff6b6b">' + esc(d.p1) + '</td>' +
+        '<td style="color:#aaa">' + esc(d.p2) + '</td>' +
+        '<td style="color:#ffd700;font-weight:700">' + (d.entryMWK || 0) + ' Pts</td>' +
+        '<td><span class="status ' + statusClass + '">' + d.status + '</span></td>' +
+        '<td style="color:#51cf66;font-weight:700">' + winnerText + '</td>' +
+        '<td>' + (d.status === 'playing' ?
+          '<button class="btn btn-view" onclick="viewPvPBoard(\'' + g.id + '\')">View</button>' +
+          '<button class="btn btn-p1" onclick="forceWinPvP(\'' + g.id + '\',\'' + d.p1 + '\',\'' + d.p2 + '\',' + (d.winMWK || 0) + ')">P1 Wins</button>' +
+          '<button class="btn btn-p2" onclick="forceWinPvP(\'' + g.id + '\',\'' + d.p2 + '\',\'' + d.p1 + '\',' + (d.winMWK || 0) + ')">P2 Wins</button>' +
+          '<button class="btn btn-refund" onclick="refundPvP(\'' + g.id + '\',\'' + d.p1 + '\',\'' + d.p2 + '\',' + (d.entryMWK || 0) + ')">Refund</button>' :
+          '<button class="btn btn-view" style="background:#1a2332;color:#888" onclick="viewPvPBoard(\'' + g.id + '\')">View</button>') + '</td>';
+      tbody.appendChild(tr);
+    });
+    document.getElementById('activeMatches').innerText = active;
+  });
+}
+
+function viewPvPBoard(gameId) {
+  db.ref('pvp_games/' + gameId).once('value', function(snap) {
+    var game = snap.val();
+    if (!game) { showToast('Game not found', 'error'); return; }
+    var board = game.board || [];
+    var turnText = game.turn === 1 ? 'Red Turn' : 'Black Turn';
+    if (game.status !== 'playing') turnText = 'Game Over';
+    document.getElementById('modalGameInfo').innerText = 'Red: ' + game.p1 + ' vs Black: ' + game.p2 + ' | Stake: ' + (game.entryMWK || 0) + ' Pts | ' + turnText;
+    var drawInfo = document.getElementById('modalDrawInfo');
+    if (game.drawTargetPlayer && game.drawCounter > 0) {
+      drawInfo.innerText = 'Draw in ' + (12 - game.drawCounter) + ' moves';
+      drawInfo.style.display = 'block';
+    } else { drawInfo.style.display = 'none'; }
+    var html = '';
+    for (var i = 0; i < 64; i++) {
+      var r = Math.floor(i / 8), c = i % 8;
+      var isDark = (r + c) % 2 === 1;
+      var p = board[i];
+      html += '<div class="modal-sq ' + (isDark ? 'dark' : 'light') + '">';
+      if (p !== 0) html += '<div class="modal-piece ' + (p > 0 ? 'p1' : 'p2') + ' ' + (Math.abs(p) === 2 ? 'king' : '') + '"></div>';
+      html += '</div>';
+    }
+    document.getElementById('modalBoardContainer').innerHTML = html;
+    document.getElementById('boardModal').style.display = 'flex';
+  });
+}
+function closeBoardModal() { document.getElementById('boardModal').style.display = 'none'; }
+
+function forceWinPvP(gameId, winnerUid, loserUid, winPts) {
+  if (!confirm('Force ' + winnerUid + ' to WIN and credit ' + winPts + ' Pts?')) return;
+  var updates = {};
+  updates['pvp_games/' + gameId + '/status'] = 'finished';
+  updates['pvp_games/' + gameId + '/winner'] = winnerUid;
+  db.ref('leaderboard_all/' + winnerUid).once('value', function(wSnap) {
+    var wD = wSnap.val() || {};
+    updates['leaderboard_all/' + winnerUid + '/mwk'] = (wD.mwk || 0) + winPts;
+    updates['leaderboard_all/' + winnerUid + '/gamesPlayed'] = (wD.gamesPlayed || 0) + 1;
+    updates['leaderboard_all/' + winnerUid + '/gamesWon'] = (wD.gamesWon || 0) + 1;
+    db.ref('users/' + winnerUid + '/mwk').transaction(function(cur) { return (cur || 0) + winPts; });
+    db.ref('leaderboard_all/' + loserUid).once('value', function(lSnap) {
+      var lD = lSnap.val() || {};
+      updates['leaderboard_all/' + loserUid + '/gamesPlayed'] = (lD.gamesPlayed || 0) + 1;
+      updates['leaderboard_all/' + loserUid + '/gamesLost'] = (lD.gamesLost || 0) + 1;
+      db.ref().update(updates).then(function() { showToast('Match resolved! Winner credited.', 'success'); }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+    });
+  });
+}
+
+function refundPvP(gameId, p1, p2, entryPts) {
+  if (!confirm('CANCEL match and refund both players ' + entryPts + ' Pts?')) return;
+  var updates = {};
+  updates['pvp_games/' + gameId + '/status'] = 'finished';
+  updates['pvp_games/' + gameId + '/winner'] = 'draw';
+  db.ref('leaderboard_all/' + p1 + '/mwk').once('value', function(p1Snap) {
+    updates['leaderboard_all/' + p1 + '/mwk'] = (p1Snap.val() || 0) + entryPts;
+    db.ref('users/' + p1 + '/mwk').transaction(function(cur) { return (cur || 0) + entryPts; });
+    db.ref('leaderboard_all/' + p2 + '/mwk').once('value', function(p2Snap) {
+      updates['leaderboard_all/' + p2 + '/mwk'] = (p2Snap.val() || 0) + entryPts;
+      db.ref('users/' + p2 + '/mwk').transaction(function(cur) { return (cur || 0) + entryPts; });
+      db.ref().update(updates).then(function() { showToast('Match cancelled! Both refunded.', 'success'); }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+    });
+  });
+}
+
+/* ===== VPN LOGS (FIXED TO READ FROM LEADERBOARD_ALL) ===== */
+function loadVpnLogs() {
+  db.ref('leaderboard_all').on('value', function(snap) {
+    lastVpnSnap = snap;
+    renderVpnLogs();
+  });
+}
+function renderVpnLogs() {
+  if (!lastVpnSnap) return;
+  var tbody = document.getElementById("vpnBody");
+  tbody.innerHTML = "";
+  var caught = 0;
+  
+  lastVpnSnap.forEach(function(child) {
+    var d = child.val();
+    if(d.ip || d.vpnStatus) {
+      var isVpn = d.vpnStatus && d.vpnStatus.includes('VPN');
+      if (isVpn) caught++;
+
+      var statusClass = isVpn ? 'status-declined' : 'status-approved';
+      var statusText = d.vpnStatus || 'Unknown';
+
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td style="font-weight:700;color:#fff">' + esc(child.key) + '</td>' +
+        '<td style="color:#00ffcc;font-family:monospace;font-size:12px">' + esc(d.ip || 'N/A') + '</td>' +
+        '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+        '<td style="color:#555;font-size:11px">' + (d.lastPlayed ? new Date(d.lastPlayed).toLocaleString() : 'N/A') + '</td>' +
+        '<td><button class="btn btn-detail" onclick="openUserEdit(\'' + child.key + '\')" title="View user details">View User</button></td>';
+      tbody.appendChild(tr);
+    }
+  });
+
+  document.getElementById('vpnCaught').innerText = caught;
+}
+
+/* ===== USERS LIST ===== */
+function loadUsers() {
+  db.ref('leaderboard_all').on('value', function(lbSnap) {
+    cachedLeaderboard = {};
+    lbSnap.forEach(function(c) { cachedLeaderboard[c.key] = c.val() || {}; });
+    renderUserList();
+    renderDeposits(); // Re-render tables to fill in missing data
+    renderWithdrawals();
+  });
+  db.ref('users').on('value', function(uSnap) {
+    cachedUsersNode = {};
+    uSnap.forEach(function(c) { cachedUsersNode[c.key] = c.val() || {}; });
+    renderUserList();
+    renderDeposits(); // Re-render tables to fill in missing phone/network data
+    renderWithdrawals();
+  });
+}
+
+function renderUserList() {
+  var users = [];
+  var bannedCount = 0;
+  Object.keys(cachedLeaderboard).forEach(function(key) {
+    if (key === ADMIN_NAME) return;
+    var d = cachedLeaderboard[key] || {};
+    users.push({ name: key, mwk: d.mwk || 0, banned: d.banned || false, displayName: d.displayName || key });
+    if (d.banned) bannedCount++;
+  });
+  users.sort(function(a, b) { return b.mwk - a.mwk; });
+  document.getElementById('totalUsers').innerText = users.length;
+  document.getElementById('bannedCount').innerText = bannedCount;
+
+  var html = '<div class="user-list-header">All Users (' + users.length + ')</div>';
+  if (!users.length) {
+    html += '<div class="empty-state" style="padding:30px">No users found</div>';
   }
+  users.forEach(function(u) {
+    var nameClass = u.banned ? 'u-name banned-text' : 'u-name';
+    var banBtn = u.banned ?
+      '<button class="btn-small btn-unban" onclick="event.stopPropagation();unbanUser(\'' + u.name + '\')">Unban</button>' :
+      '<button class="btn-small btn-ban" onclick="event.stopPropagation();banUser(\'' + u.name + '\')">Ban</button>';
+    html += '<div class="user-item" id="u-' + u.name + '" onclick="openAdminChat(\'' + u.name + '\')">' +
+      '<div><div class="' + nameClass + '"><span class="offline-dot" id="dot-' + u.name + '"></span>' + esc(u.displayName) + (u.banned ? ' 🚫' : '') + '</div>' +
+      '<div class="u-sub">' + u.mwk.toLocaleString() + ' Pts</div></div>' +
+      '<div class="u-actions">' +
+      '<button class="btn-small btn-detail" onclick="event.stopPropagation();openUserEdit(\'' + u.name + '\')" title="Edit user">Edit</button>' +
+      banBtn + '</div></div>';
+  });
+  document.getElementById('usersListPanel').innerHTML = html;
 
-  function isNativeApp() {
-    try {
-      if (window.MedianNative) return true;
-      var ua = (navigator.userAgent || '').toLowerCase();
-      if (ua.indexOf('median') !== -1) return true;
-      if (typeof median !== 'undefined' && typeof median.ready === 'function') return true;
-      var isAndroid = ua.indexOf('android') !== -1;
-      var isWV = ua.indexOf('wv') !== -1 || ua.indexOf('webview') !== -1;
-      var isRegularChrome = ua.indexOf('chrome') !== -1 && ua.indexOf('wv') === -1;
-      if (isAndroid && isWV && !isRegularChrome) return true;
-      if (window.__MEDIAN__) return true;
-      if (window.__goNativeBridge) return true;
-      var loc = window.location || {};
-      if (loc.protocol === 'file:') return true;
-      if (loc.href && loc.href.indexOf('median://') === 0) return true;
-    } catch(e) {}
-    return false;
-  }
+  // Listen online status
+  users.forEach(function(u) {
+    db.ref('online_status/' + u.name).on('value', function(ps) {
+      var dot = document.getElementById('dot-' + u.name);
+      if (dot) {
+        var sd = ps.val();
+        dot.className = (sd && sd.online) ? 'online-dot' : 'offline-dot';
+      }
+      updateOnlineCount();
+    });
+  });
+  loadInboxUnreadCounts(users);
+}
 
-  if (isNativeApp()) {
-    hideAppGate();
+function updateOnlineCount() {
+  var c = document.querySelectorAll('.online-dot').length;
+  document.getElementById('onlineUsers').innerText = c;
+}
+
+function banUser(u) { if (!confirm('BAN ' + u + '?')) return; db.ref('leaderboard_all/' + u).update({ banned: true }); showToast(u + ' banned.', 'error'); }
+function unbanUser(u) { if (!confirm('UNBAN ' + u + '?')) return; db.ref('leaderboard_all/' + u).update({ banned: false }); showToast(u + ' unbanned.', 'success'); }
+
+/* ===== USER EDIT MODAL (THE BIG FIX) ===== */
+function openUserEdit(uid) {
+  // FIX: Check if user exists before opening
+  var exists = cachedLeaderboard[uid] || cachedUsersNode[uid];
+  if (!exists) {
+    showToast('Error: This user has deleted their account!', 'error');
+    var userEl = document.getElementById('u-' + uid);
+    if (userEl) userEl.remove(); // Remove ghost element
     return;
   }
+  
+  var d = getUserData(uid);
+  var winRate = d.gamesPlayed > 0 ? Math.round((d.gamesWon / d.gamesPlayed) * 100) : 0;
+  var verified = d.hasEmail && d.hasPhone;
+  var regDate = d.created ? new Date(d.created).toLocaleDateString() + ' ' + new Date(d.created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+  var lastPlay = d.lastPlayed ? new Date(d.lastPlayed).toLocaleDateString() : 'Never';
+  var picHtml = d.profilePic ?
+    '<img src="' + d.profilePic + '" class="edit-profile-pic" onclick="window.open(this.src)">' :
+    '<div style="width:80px;height:80px;border-radius:50%;background:#1a2332;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#00ffcc;border:2px solid #1a2332">' + esc(d.displayName[0]).toUpperCase() + '</div>';
 
-  var pollInterval = setInterval(function() {
-    checkCount++;
-    if (isNativeApp()) {
-      clearInterval(pollInterval);
-      hideAppGate();
-      return;
-    }
-    if (checkCount >= MAX_CHECKS) {
-      clearInterval(pollInterval);
-      showAppGate();
-    }
-  }, 250);
+  var html = picHtml;
+  html += '<div class="edit-section-title">Account Info</div>';
+  html += '<div class="edit-modal-grid">';
+  html += '<div class="full-width"><div class="edit-field-label">Username</div><div class="edit-field-value" style="font-family:monospace;color:#00ccff">' + esc(uid) + '</div></div>';
+  html += '<div><div class="edit-field-label">Display Name</div><input class="edit-field-input" id="editDisplayName" value="' + esc(d.displayName) + '" maxlength="20"></div>';
+  html += '<div><div class="edit-field-label">Verification</div><div class="edit-field-value">' + (verified ? '<span class="edit-verified">Verified</span>' : '<span class="edit-unverified">Unverified</span>') + '</div></div>';
+  html += '<div><div class="edit-field-label">Phone</div><input class="edit-field-input" id="editPhone" value="' + esc(d.phone) + '" placeholder="+265 99XXXXXXX"></div>';
+  html += '<div><div class="edit-field-label">Network</div><select class="edit-field-input" id="editNetwork"><option value="Airtel Money"' + (d.network === 'Airtel Money' ? ' selected' : '') + '>Airtel Money</option><option value="TNM Mpamba"' + (d.network === 'TNM Mpamba' ? ' selected' : '') + '>TNM Mpamba</option></select></div>';
+  html += '<div class="full-width"><div class="edit-field-label">Email</div><input class="edit-field-input" id="editEmail" value="' + esc(d.email) + '" placeholder="user@email.com" type="email"></div>';
+  html += '<div class="full-width"><div class="edit-field-label">Registered</div><div class="edit-field-value" style="font-size:12px;color:#888">' + regDate + '</div></div>';
+  html += '</div>';
 
-  (function tryMedianReady() {
-    try {
-      if (typeof median !== 'undefined' && typeof median.ready === 'function') {
-        median.ready(function() {
-          clearInterval(pollInterval);
-          hideAppGate();
-        });
-      } else if (checkCount < MAX_CHECKS) {
-        setTimeout(tryMedianReady, 300);
-      }
-    } catch(e) {}
-  })();
+  html += '<div class="edit-section-title">Balance</div>';
+  html += '<div class="edit-modal-grid">';
+  html += '<div><div class="edit-field-label">Points Balance (both nodes)</div><input class="edit-field-input" id="editMWK" type="number" value="' + d.mwk + '" min="0"></div>';
+  html += '<div><div class="edit-field-label">Leaderboard Points</div><div class="edit-field-value" style="color:#ffd700">' + d.mwk.toLocaleString() + '</div></div>';
+  html += '<div class="full-width"><div class="edit-field-label">Users Node Points</div><div class="edit-field-value" style="color:#888">' + d.mwkUsers.toLocaleString() + ' ' + (d.mwk !== d.mwkUsers ? '<span style="color:#ff6b6b;font-size:10px">(MISMATCH - save to sync)</span>' : '<span style="color:#51cf66;font-size:10px">(Synced)</span>') + '</div></div>';
+  html += '</div>';
 
-  var medianScript = document.querySelector('script[src*="median"]');
-  if (medianScript) {
-    medianScript.onload = function() {
-      setTimeout(function() {
-        if (isNativeApp()) {
-          clearInterval(pollInterval);
-          hideAppGate();
-        }
-      }, 200);
-    };
+  html += '<div class="edit-section-title">Game Stats</div>';
+  html += '<div class="edit-stats-grid">';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#00ffcc">' + winRate + '%</div><div class="edit-stat-label">Win Rate</div></div>';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#51cf66">' + d.gamesWon + '</div><div class="edit-stat-label">Wins</div></div>';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#ff6b6b">' + d.gamesLost + '</div><div class="edit-stat-label">Losses</div></div>';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#ffd700">' + d.gamesPlayed + '</div><div class="edit-stat-label">Played</div></div>';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#ff922b">' + d.winStreak + '</div><div class="edit-stat-label">Win Streak</div></div>';
+  html += '<div class="edit-stat-box"><div class="edit-stat-value" style="color:#9b59b6">' + d.score + '</div><div class="edit-stat-label">Score</div></div>';
+  html += '</div>';
+  html += '<div style="font-size:11px;color:#555;margin-top:8px">Last played: ' + lastPlay + ' | Referral claimed: ' + d.referralClaimed + '</div>';
+
+  html += '<div class="edit-section-title">Password</div>';
+  html += '<div class="edit-modal-grid">';
+  html += '<div class="full-width"><div class="edit-field-label">Set New Password (leave blank to keep current)</div><input class="edit-field-input" id="editPassword" type="password" placeholder="Enter new password (min 6 chars)"></div>';
+  html += '</div>';
+
+  html += '<div class="edit-modal-actions">';
+  html += '<button class="btn btn-reset-pw" onclick="generateRandomPassword(\'' + uid + '\')">Random Password</button>';
+  html += '<button class="btn btn-reject" onclick="deleteUserAccount(\'' + uid + '\')">Delete Account</button>';
+  html += '<button class="btn" style="background:#333;color:#888" onclick="closeUserEdit()">Cancel</button>';
+  html += '<button class="btn btn-approve" onclick="saveUserEdits(\'' + uid + '\')">Save All Changes</button>';
+  html += '</div>';
+
+  document.getElementById('editModalTitle').innerText = 'Edit: ' + d.displayName;
+  document.getElementById('editModalBody').innerHTML = html;
+  document.getElementById('userEditModal').style.display = 'flex';
+}
+
+function closeUserEdit() { document.getElementById('userEditModal').style.display = 'none'; }
+
+function saveUserEdits(uid) {
+  var displayName = (document.getElementById('editDisplayName').value || '').trim();
+  var phone = (document.getElementById('editPhone').value || '').trim();
+  var network = document.getElementById('editNetwork').value;
+  var email = (document.getElementById('editEmail').value || '').trim();
+  var mwk = parseInt(document.getElementById('editMWK').value) || 0;
+  var newPass = (document.getElementById('editPassword').value || '').trim();
+
+  if (!displayName || displayName.length < 2) { showToast('Display name must be at least 2 characters', 'error'); return; }
+
+  var lbUpdates = {
+    displayName: displayName,
+    phone: phone,
+    network: network,
+    mwk: mwk
+  };
+  var userUpdates = {
+    phone: phone,
+    network: network,
+    mwk: mwk
+  };
+  if (email) userUpdates.email = email;
+
+  // Handle password change
+  var passwordPromise;
+  if (newPass && newPass.length >= 6) {
+    passwordPromise = db.ref('users/' + uid + '/password').set(md5(newPass));
+  } else if (newPass && newPass.length < 6) {
+    showToast('Password must be at least 6 characters', 'error');
+    return;
+  } else {
+    passwordPromise = Promise.resolve();
   }
 
-  var safetyInterval = setInterval(function() {
-    if (gateDismissed) {
-      clearInterval(safetyInterval);
-      return;
+  // Handle email index update if email changed
+  var oldEmail = cachedUsersNode[uid] ? (cachedUsersNode[uid].email || '') : '';
+  var emailIndexPromise;
+  if (email && email !== oldEmail) {
+    // Remove old index
+    if (oldEmail) {
+      db.ref('email_index/' + emailToKey(oldEmail)).remove();
     }
-    if (window.MedianNative || isNativeApp()) {
-      clearInterval(safetyInterval);
-      clearInterval(pollInterval);
-      hideAppGate();
-    }
-  }, 500);
+    // Add new index
+    emailIndexPromise = db.ref('email_index/' + emailToKey(email)).set({ uid: uid });
+  } else {
+    emailIndexPromise = Promise.resolve();
+  }
 
-  setTimeout(function() {
-    clearInterval(safetyInterval);
-    clearInterval(pollInterval);
-  }, 60000);
+  Promise.all([
+    db.ref('leaderboard_all/' + uid).update(lbUpdates),
+    db.ref('users/' + uid).update(userUpdates),
+    passwordPromise,
+    emailIndexPromise
+  ]).then(function() {
+    // Refresh cached data
+    cachedUsersNode[uid] = Object.assign(cachedUsersNode[uid] || {}, userUpdates);
+    if (email) cachedUsersNode[uid].email = email;
+    cachedLeaderboard[uid] = Object.assign(cachedLeaderboard[uid] || {}, lbUpdates);
+    renderUserList();
+    closeUserEdit();
+    showToast('User ' + uid + ' updated successfully!', 'success');
+  }).catch(function(err) {
+    showToast('Save failed: ' + err.message, 'error');
+  });
+}
 
-  var gateEl = document.getElementById('appInstallGate');
-  if (gateEl && typeof MutationObserver !== 'undefined') {
-    var observer = new MutationObserver(function(mutations) {
-      if (gateDismissed && gateEl.style.display !== 'none') {
-        gateEl.style.display = 'none';
+function generateRandomPassword(uid) {
+  var chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  var np = '';
+  for (var i = 0; i < 8; i++) np += chars.charAt(Math.floor(Math.random() * chars.length));
+  document.getElementById('editPassword').value = np;
+  showToast('Random password generated: ' + np + ' (click Save to apply)', 'success');
+}
+
+function deleteUserAccount(uid) {
+  if (!confirm('PERMANENTLY DELETE account ' + uid + '?\n\nThis will remove all data including balance, history, chats. This CANNOT be undone!')) return;
+  if (!confirm('FINAL WARNING: Type OK in the next prompt to confirm deletion of ' + uid)) return;
+  var ok = prompt('Type OK to confirm permanent deletion of ' + uid);
+  if (ok !== 'OK') { showToast('Deletion cancelled.', 'error'); return; }
+
+  var d = getUserData(uid);
+  var tasks = [
+    db.ref('users/' + uid).remove(),
+    db.ref('leaderboard_all/' + uid).remove(),
+    db.ref('match_history/' + uid).remove(),
+    db.ref('online_status/' + uid).remove(),
+    db.ref('admin_inbox/' + uid).remove(),
+    db.ref('referrals/' + uid).remove(),
+    db.ref('password_resets/' + uid).remove()
+  ];
+  if (d.email) tasks.push(db.ref('email_index/' + emailToKey(d.email)).remove());
+
+  // Remove from all chats
+  db.ref('chats').once('value', function(snap) {
+    snap.forEach(function(c) {
+      var chatId = c.key;
+      if (chatId.indexOf(uid) >= 0) {
+        tasks.push(db.ref('chats/' + chatId + '/messages').remove());
       }
     });
-    observer.observe(gateEl, { attributes: true, attributeFilter: ['style'] });
-  }
-})();
-</script>
+    Promise.all(tasks).then(function() {
+      delete cachedLeaderboard[uid];
+      delete cachedUsersNode[uid];
+      renderUserList();
+      closeUserEdit();
+      showToast('Account ' + uid + ' permanently deleted.', 'error');
+    }).catch(function(err) { showToast('Delete error: ' + err.message, 'error'); });
+  });
+}
 
+/* ===== CHAT ===== */
+function loadInboxUnreadCounts(users) {
+  inboxUnreadCounts = {};
+  users.forEach(function(u) {
+    db.ref('admin_inbox/' + u.name + '/messages').orderByChild('timestamp').limitToLast(50).once('value', function(snap) {
+      var count = 0;
+      snap.forEach(function(c) { if (c.val().from === 'user') count++; });
+      inboxUnreadCounts[u.name] = count;
+      if (currentChatUser === u.name && currentChatMode === 'inbox') {
+        var badge = document.getElementById('inboxBadge');
+        if (badge) { badge.innerText = count; badge.style.display = count > 0 ? 'inline' : 'none'; }
+      }
+    });
+  });
+}
+
+function switchChatMode(mode) {
+  currentChatMode = mode;
+  document.getElementById('modeChatBtn').className = 'chat-mode-btn' + (mode === 'chat' ? ' active-mode' : '');
+  document.getElementById('modeInboxBtn').className = 'chat-mode-btn' + (mode === 'inbox' ? ' active-mode' : '');
+  if (currentChatUser) openAdminChat(currentChatUser);
+}
+
+function openAdminChat(username) {
+  // FIX: Check if user exists before opening
+  var exists = cachedLeaderboard[username] || cachedUsersNode[username];
+  if (!exists) {
+    showToast('Error: This user has deleted their account!', 'error');
+    var userEl = document.getElementById('u-' + username);
+    if (userEl) userEl.remove(); // Remove ghost element
+    return;
+  }
+  
+  currentChatUser = username;
+  var ud = getUserData(username);
+  document.getElementById('chatHeader').innerHTML = '<span>Chatting with: <strong>' + esc(ud.displayName) + '</strong></span>' +
+    '<div class="chat-mode-toggle" id="chatModeToggle">' +
+    '<button class="chat-mode-btn ' + (currentChatMode === 'chat' ? 'active-mode' : '') + '" id="modeChatBtn" onclick="switchChatMode(\'chat\')">Chat</button>' +
+    '<button class="chat-mode-btn ' + (currentChatMode === 'inbox' ? 'active-mode' : '') + '" id="modeInboxBtn" onclick="switchChatMode(\'inbox\')">Inbox <span id="inboxBadge" class="inbox-badge" style="display:none">' + (inboxUnreadCounts[username] || 0) + '</span></button></div>';
+  document.getElementById('adminMsgInput').disabled = false;
+  document.getElementById('adminSendBtn').disabled = false;
+  document.querySelectorAll('.user-item').forEach(function(el) { el.classList.remove('active'); });
+  var userEl = document.getElementById('u-' + username);
+  if (userEl) userEl.classList.add('active');
+  if (currentChatMode === 'inbox') loadInboxMessages(username);
+  else loadChatMessages(username);
+}
+
+function loadChatMessages(username) {
+  var chatId = [ADMIN_NAME, username].sort().join('_');
+  // Turn off any previous listener
+  db.ref('chats/' + chatId + '/messages').off();
+  db.ref('chats/' + chatId + '/messages').orderByChild('timestamp').limitToLast(100).on('value', function(snap) {
+    var html = '';
+    adminMessagesCache = {};
+    snap.forEach(function(c) {
+      var m = c.val(), mk = c.key, isMe = m.from === ADMIN_NAME;
+      var time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      adminMessagesCache[mk] = m;
+      var content = esc(m.text || '');
+      if (m.image) content += '<img src="' + m.image + '" style="max-width:180px;border-radius:8px;display:block;margin-top:5px;cursor:pointer" onclick="window.open(this.src)">';
+      if (m.audio) content += '<audio controls src="' + m.audio + '" style="height:32px;width:160px;margin-top:5px"></audio>';
+      if (m.fileData) content += '<a href="' + m.fileData + '" download style="color:#00ccff;font-size:12px;display:inline-block;margin-top:5px">File: ' + esc(m.fileName || 'Download') + '</a>';
+      var actions = '<div class="msg-actions-row">' +
+        '<button class="msg-action-btn msg-delete-btn" onclick="deleteChatMsg(\'' + chatId + '\',\'' + mk + '\')">Delete</button>';
+      if (m.image) actions += '<button class="msg-action-btn msg-save-btn" onclick="saveAdminPhoto(\'' + mk + '\')">Save</button>';
+      if (m.audio) actions += '<button class="msg-action-btn msg-save-btn" onclick="saveAdminAudio(\'' + mk + '\')">Save</button>';
+      actions += '</div>';
+      html += '<div class="msg-bubble ' + (isMe ? 'msg-admin' : 'msg-user') + '" id="admin-msg-' + mk + '">' +
+        '<span class="msg-source-tag msg-source-chat">Chat</span>' + content +
+        '<div style="font-size:10px;color:#555;margin-top:4px;text-align:right">' + time + '</div>' + actions + '</div>';
+      if (!isMe && !m.read) db.ref('chats/' + chatId + '/messages/' + mk).update({ read: true });
+    });
+    var area = document.getElementById('chatMessages');
+    area.innerHTML = html || '<div class="empty-state">No chat messages yet.</div>';
+    area.scrollTop = area.scrollHeight;
+  });
+}
+
+function loadInboxMessages(username) {
+  // Turn off chat listener
+  var oldChatId = [ADMIN_NAME, username].sort().join('_');
+  db.ref('chats/' + oldChatId + '/messages').off();
+  db.ref('admin_inbox/' + username + '/messages').off();
+  db.ref('admin_inbox/' + username + '/messages').orderByChild('timestamp').limitToLast(100).on('value', function(snap) {
+    var html = '';
+    adminMessagesCache = {};
+    snap.forEach(function(c) {
+      var m = c.val(), mk = c.key, isMe = m.from === 'admin';
+      var time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      adminMessagesCache[mk] = m;
+      var content = esc(m.text || '');
+      if (m.image) content += '<img src="' + m.image + '" style="max-width:180px;border-radius:8px;display:block;margin-top:5px;cursor:pointer" onclick="window.open(this.src)">';
+      if (m.fileData) content += '<a href="' + m.fileData + '" download style="color:#00ccff;font-size:12px;display:inline-block;margin-top:5px">File: ' + esc(m.fileName || 'Download') + '</a>';
+      var actions = '<div class="msg-actions-row">' +
+        '<button class="msg-action-btn msg-delete-btn" onclick="deleteInboxMsg(\'' + username + '\',\'' + mk + '\')">Delete</button>';
+      if (m.image) actions += '<button class="msg-action-btn msg-save-btn" onclick="saveAdminPhoto(\'' + mk + '\')">Save</button>';
+      if (m.fileData) actions += '<button class="msg-action-btn msg-save-btn" onclick="saveAdminFile(\'' + mk + '\')">Save</button>';
+      actions += '</div>';
+      html += '<div class="msg-bubble ' + (isMe ? 'msg-admin' : 'msg-user') + '" id="admin-msg-' + mk + '">' +
+        '<span class="msg-source-tag msg-source-inbox">Inbox</span>' + content +
+        '<div style="font-size:10px;color:#555;margin-top:4px;text-align:right">' + time + '</div>' + actions + '</div>';
+    });
+    var area = document.getElementById('chatMessages');
+    area.innerHTML = html || '<div class="empty-state">No inbox messages yet.</div>';
+    area.scrollTop = area.scrollHeight;
+  });
+}
+
+function sendAdminMsg() {
+  var input = document.getElementById('adminMsgInput');
+  var text = input.value.trim();
+  if (!text || !currentChatUser) return;
+  var msgData = { from: currentChatMode === 'inbox' ? 'admin' : ADMIN_NAME, text: text, timestamp: Date.now() };
+  if (currentChatMode === 'chat') msgData.read = false;
+  var ref = currentChatMode === 'inbox' ?
+    db.ref('admin_inbox/' + currentChatUser + '/messages') :
+    db.ref('chats/' + [ADMIN_NAME, currentChatUser].sort().join('_') + '/messages');
+  ref.push(msgData).then(function() { input.value = ''; }).catch(function(e) { showToast('Send failed: ' + e.message, 'error'); });
+}
+
+function handleAdminFileUpload(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file || !currentChatUser) return;
+  var isImage = file.type.startsWith('image/');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    if (isImage) {
+      var img = new Image();
+      img.onload = function() {
+        var c = document.createElement('canvas'), w = 600, h = 600, iw = img.width, ih = img.height;
+        if (iw > w) { ih *= w / iw; iw = w; }
+        if (ih > h) { iw *= h / ih; ih = h; }
+        c.width = Math.round(iw); c.height = Math.round(ih);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        var base64 = c.toDataURL('image/jpeg', 0.5);
+        var msgData = { from: currentChatMode === 'inbox' ? 'admin' : ADMIN_NAME, image: base64, timestamp: Date.now() };
+        if (currentChatMode === 'chat') msgData.read = false;
+        var ref = currentChatMode === 'inbox' ?
+          db.ref('admin_inbox/' + currentChatUser + '/messages') :
+          db.ref('chats/' + [ADMIN_NAME, currentChatUser].sort().join('_') + '/messages');
+        ref.push(msgData).catch(function(er) { showToast('Upload failed: ' + er.message, 'error'); });
+      };
+      img.src = ev.target.result;
+    } else {
+      if (file.size > 1024 * 1024) { showToast('File max 1MB', 'error'); e.target.value = ''; return; }
+      var msgData = { from: currentChatMode === 'inbox' ? 'admin' : ADMIN_NAME, fileData: ev.target.result, fileName: file.name, timestamp: Date.now() };
+      if (currentChatMode === 'chat') msgData.read = false;
+      var ref = currentChatMode === 'inbox' ?
+        db.ref('admin_inbox/' + currentChatUser + '/messages') :
+        db.ref('chats/' + [ADMIN_NAME, currentChatUser].sort().join('_') + '/messages');
+      ref.push(msgData).catch(function(er) { showToast('Upload failed: ' + er.message, 'error'); });
+    }
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function deleteChatMsg(chatId, mk) {
+  if (!confirm('Delete this message?')) return;
+  var el = document.getElementById('admin-msg-' + mk);
+  if (el) el.classList.add('deleting');
+  db.ref('chats/' + chatId + '/messages/' + mk).remove(function(err) {
+    if (err) { showToast('Delete failed', 'error'); if (el) el.classList.remove('deleting'); }
+  });
+}
+function deleteInboxMsg(username, mk) {
+  if (!confirm('Delete this message?')) return;
+  var el = document.getElementById('admin-msg-' + mk);
+  if (el) el.classList.add('deleting');
+  db.ref('admin_inbox/' + username + '/messages/' + mk).remove(function(err) {
+    if (err) { showToast('Delete failed', 'error'); if (el) el.classList.remove('deleting'); }
+  });
+}
+function saveAdminPhoto(mk) {
+  var m = adminMessagesCache[mk];
+  if (!m || !m.image) { showToast('No photo', 'error'); return; }
+  try { var a = document.createElement('a'); a.href = m.image; a.download = 'photo_' + Date.now() + '.jpg'; a.style.display = 'none'; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); }, 500); }
+  catch (e) { showToast('Right-click image to save', 'error'); }
+}
+function saveAdminFile(mk) {
+  var m = adminMessagesCache[mk];
+  if (!m || !m.fileData) { showToast('No file', 'error'); return; }
+  try { var a = document.createElement('a'); a.href = m.fileData; a.download = m.fileName || 'file_' + Date.now(); a.style.display = 'none'; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); }, 500); }
+  catch (e) { showToast('Click the file link to download', 'error'); }
+}
+function saveAdminAudio(mk) {
+  var m = adminMessagesCache[mk];
+  if (!m || !m.audio) { showToast('No audio', 'error'); return; }
+  try { var a = document.createElement('a'); a.href = m.audio; a.download = 'voice_' + Date.now() + '.webm'; a.style.display = 'none'; document.body.appendChild(a); a.click(); setTimeout(function() { document.body.removeChild(a); }, 500); }
+  catch (e) { showToast('Cannot save audio', 'error'); }
+}
+
+/* ===== VOICE NOTE ===== */
+function toggleAdminVoiceNote() {
+  if (isAdminRecording) stopAdminVoiceRecording();
+  else startAdminVoiceRecording();
+}
+function startAdminVoiceRecording() {
+  if (!currentChatUser) { showToast('Select a user first', 'error'); return; }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+    adminAudioChunks = [];
+    adminMediaRecorder = new MediaRecorder(stream);
+    adminMediaRecorder.ondataavailable = function(e) { adminAudioChunks.push(e.data); };
+    adminMediaRecorder.onstop = function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      var blob = new Blob(adminAudioChunks, { type: 'audio/webm' });
+      var reader = new FileReader();
+      reader.onload = function() {
+        var msgData = { from: currentChatMode === 'inbox' ? 'admin' : ADMIN_NAME, audio: reader.result, timestamp: Date.now() };
+        if (currentChatMode === 'chat') msgData.read = false;
+        var ref = currentChatMode === 'inbox' ?
+          db.ref('admin_inbox/' + currentChatUser + '/messages') :
+          db.ref('chats/' + [ADMIN_NAME, currentChatUser].sort().join('_') + '/messages');
+        ref.push(msgData);
+      };
+      reader.readAsDataURL(blob);
+    };
+    adminMediaRecorder.start();
+    isAdminRecording = true;
+    adminRecSeconds = 0;
+    var vb = document.getElementById('adminVoiceBtn');
+    if (vb) { vb.classList.add('recording'); vb.innerText = '⏹'; }
+    var rb = document.getElementById('adminRecordingBar');
+    if (rb) rb.classList.add('active');
+    adminRecTimer = setInterval(function() {
+      adminRecSeconds++;
+      var te = document.getElementById('adminRecTime');
+      if (te) te.innerText = adminRecSeconds + 's';
+      if (adminRecSeconds >= 120) stopAdminVoiceRecording();
+    }, 1000);
+  }).catch(function(err) { showToast('Microphone denied: ' + err.message, 'error'); });
+}
+function stopAdminVoiceRecording() {
+  if (adminMediaRecorder && adminMediaRecorder.state !== 'inactive') adminMediaRecorder.stop();
+  isAdminRecording = false;
+  clearInterval(adminRecTimer);
+  adminRecSeconds = 0;
+  var vb = document.getElementById('adminVoiceBtn');
+  if (vb) { vb.classList.remove('recording'); vb.innerText = '🎤'; }
+  var rb = document.getElementById('adminRecordingBar');
+  if (rb) rb.classList.remove('active');
+  var te = document.getElementById('adminRecTime');
+  if (te) te.innerText = '0s';
+}
+
+/* ===== UTILS ===== */
+function esc(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function emailToKey(e) { if (!e) return ''; return e.toLowerCase().trim().replace(/\./g, '_dot_').replace(/#/g, '_hash_').replace(/\$/g, '_dollar_').replace(/\[/g, '_lb_').replace(/\]/g, '_rb_').replace(/\//g, '_slash_'); }
+
+/* ===== MD5 (same as main game) ===== */
+!function(n){"use strict";function d(n,t){var r=(65535&n)+(65535&t);return(n>>16)+(t>>16)+(r>>16)<<16|65535&r}function f(n,t,r,e,o,u){return d((c=d(d(t,n),d(e,u)))<<(a=o)|c>>>32-a,r);var c,a}function l(n,t,r,e,o,u,c){return f(t&r|~t&e,n,t,o,u,c)}function g(n,t,r,e,o,u,c){return f(t&e|r&~e,n,t,o,u,c)}function v(n,t,r,e,o,u,c){return f(t^r^e,n,t,o,u,c)}function m(n,t,r,e,o,u,c){return f(r^(t|~e),n,t,o,u,c)}function i(n,t){var r,e,o,u,c;n[t>>5]|=128<<t%32,n[14+(t+64>>>9<<4)]=t;var a=1732584193,f=-271733879,i=-1732584194,h=271733878;for(r=0;r<n.length;r+=16)a=l(e=a,o=f,u=i,c=h,n[r],7,-680876936),h=l(h,a,f,i,n[r+1],12,-389564586),i=l(i,h,a,f,n[r+2],17,606105819),f=l(f,i,h,a,n[r+3],22,-1044525330),a=l(a,f,i,h,n[r+4],7,-176418897),h=l(h,a,f,i,n[r+5],12,1200080426),i=l(i,h,a,f,n[r+6],17,-1473231341),f=l(f,i,h,a,n[r+7],22,-45705983),a=l(a,f,i,h,n[r+8],7,1770035416),h=l(h,a,f,i,n[r+9],12,-1958414417),i=l(i,h,a,f,n[r+10],17,-42063),f=l(f,i,h,a,n[r+11],22,-1990404162),a=l(a,f,i,h,n[r+12],7,1804603682),h=l(h,a,f,i,n[r+13],12,-40341101),i=l(i,h,a,f,n[r+14],17,-1502002290),f=l(f,i,h,a,n[r+15],22,1236535329),a=g(a,f,i,h,n[r+1],5,-165796510),h=g(h,a,f,i,n[r+6],9,-1069501632),i=g(i,h,a,f,n[r+11],14,643717713),f=g(f,i,h,a,n[r+0],20,-373897302),a=g(a,f,i,h,n[r+5],5,-701558691),h=g(h,a,f,i,n[r+10],9,38016083),i=g(i,h,a,f,n[r+15],14,-660478335),f=g(f,i,h,a,n[r+4],20,-405537848),a=g(a,f,i,h,n[r+9],5,568446438),h=g(h,a,f,i,n[r+14],9,-1019803690),i=g(i,h,a,f,n[r+3],14,-187363961),f=g(f,i,h,a,n[r+8],20,1163531501),a=g(a,f,i,h,n[r+13],5,-1444681467),h=g(h,a,f,i,n[r+2],9,-51403784),i=g(i,h,a,f,n[r+7],14,1735328473),f=g(f,i,h,a,n[r+12],20,-1926607734),a=v(a,f,i,h,n[r+5],4,-378558),h=v(h,a,f,i,n[r+8],11,-2022574463),i=v(i,h,a,f,n[r+11],16,1839030562),f=v(f,i,h,a,n[r+14],23,-35309556),a=v(a,f,i,h,n[r+1],4,-1530992060),h=v(h,a,f,i,n[r+4],11,1272893353),i=v(i,h,a,f,n[r+7],16,-155497632),f=g(f,i,h,a,n[r+10],23,-1094730640),a=g(a,f,i,h,n[r+13],4,681279174),h=g(h,a,f,i,n[r+0],11,-358537222),i=g(i,h,a,f,n[r+3],16,-722521979),f=g(f,i,h,a,n[r+6],23,76029189),a=g(a,f,i,h,n[r+9],4,-640364487),h=g(h,a,f,i,n[r+12],11,-421815835),i=g(i,h,a,f,n[r+15],16,530742520),f=g(f,i,h,a,n[r+2],23,-995338651),a=m(a,f,i,h,n[r],6,-198630844),h=m(h,a,f,i,n[r+7],10,1126891415),i=m(i,h,a,f,n[r+14],15,-1416354905),f=m(f,i,h,a,n[r+5],21,-57434055),a=m(a,f,i,h,n[r+12],6,1700485571),h=m(h,a,f,i,n[r+3],10,-1894986606),i=m(i,h,a,f,n[r+10],15,-1051523),f=m(f,i,h,a,n[r+1],21,-2054922799),a=m(a,f,i,h,n[r+8],6,1873313359),h=m(h,a,f,i,n[r+15],10,-30611744),i=m(i,h,a,f,n[r+6],15,-1560198380),f=m(f,i,h,a,n[r+13],21,1309151649),a=m(a,f,i,h,n[r+4],6,-145523070),h=m(h,a,f,i,n[r+11],10,-1120210379),i=m(i,h,a,f,n[r+2],15,718787259),f=m(f,i,h,a,n[r+9],21,-343485551),a=d(a,e),f=d(f,o),i=d(i,u),h=d(h,c);return[a,f,i,h]}function h(n){var t,r="",e=32*n.length;for(t=0;t<e;t+=8)r+=String.fromCharCode(n[t>>5]>>>t%32&255);return r}function a(n){var t,r=[];for(r[(n.length>>2)-1]=void 0,t=0;t<r.length;t+=1)r[t]=0;var e=8*n.length;for(t=0;t<e;t+=8)r[t>>5]|=(255&n.charCodeAt(t/8))<<t%32;return r}function e(n){var t,r,e="0123456789abcdef",o="";for(r=0;r<n.length;r+=1)t=n.charCodeAt(r),o+=e.charAt(t>>>4&15)+e.charAt(15&t);return o}function r(n){return unescape(encodeURIComponent(n))}function o(n){return e(i(a(t=r(n)),8*t.length));var t}function u(n,t){return function(n,t){var r,e,o=a(n),u=[],c=[];for(u[15]=u[14]=u[13]=u[12]=u[11]=u[10]=u[9]=u[8]=u[7]=u[6]=u[5]=u[4]=u[3]=u[2]=u[1]=u[0]=0,r=0;r<o.length;r+=64){for(e=0;e<16;e+=1)u[e]=o[r+e];o=r+u.slice(0,16)}return h(o)}(r(n),r(t))}function c(n,t,r){return t?r?u(t,n):e(u(t,n)):r?o(n):e(o(n))}"function"==typeof define&&define.amd?define(function(){return c}):"object"==typeof module&&module.exports?module.exports=c:n.md5=c}(this);
+
+document.getElementById('adminMsgInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') sendAdminMsg(); });
+
+function initAdmin() { loadDeposits(); loadWithdrawals(); loadPvPGames(); loadUsers(); loadVpnLogs(); }
+</script>
 </body>
-</html>
+  </html>
